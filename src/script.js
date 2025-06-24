@@ -65,73 +65,18 @@ function updateAuthButtons() {
     }
     window.submitRegister = submitRegister;
 
-    async function showLeaderboard() {
+    // Example function to fetch leaderboard
+    async function fetchLeaderboard() {
         try {
-            // ✅ Utilise la structure HTML existante au lieu de créer une nouvelle div
-            const leaderboardForm = document.getElementById('leaderboardForm');
-            const leaderboardContent = document.getElementById('leaderboardContent');
-            
-            // Affiche le modal
-            leaderboardForm.classList.remove('hidden');
-            document.querySelector('.button-container').classList.add('hidden');
-            document.querySelector('.secondary-buttons').classList.add('hidden');
-            
-            // Affiche le message de chargement
-            leaderboardContent.innerHTML = '<div class="loading-message">Loading leaderboard...</div>';
-            
-            const response = await fetch('http://localhost:5000/api/v1/leaderboard');
-            
+            const response = await fetch('http://localhost:5000/api/v1/progress/leaderboard');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            const leaderboardData = await response.json();
-            
-            let leaderboardHTML = '';
-            
-            if (!leaderboardData || leaderboardData.length === 0) {
-                leaderboardHTML = '<div class="no-data-message">No times recorded yet. Be the first to complete a level!</div>';
-            } else {
-                // Groupe par niveau
-                const levels = {};
-                leaderboardData.forEach(entry => {
-                    if (!levels[entry.level]) {
-                        levels[entry.level] = [];
-                    }
-                    levels[entry.level].push(entry);
-                });
-                
-                Object.keys(levels).sort((a, b) => parseInt(a) - parseInt(b)).forEach(level => {
-                    leaderboardHTML += `
-                        <div class="level-section">
-                            <h3>🎮 Level ${level} 🎮</h3>
-                            <div class="leaderboard-entries">`;
-                    
-                    levels[level].slice(0, 10).forEach((entry, index) => {
-                        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<span class="rank-badge">${index + 1}</span>`;
-                        leaderboardHTML += `
-                            <div class="leaderboard-entry">
-                                <span class="medal">${medal}</span>
-                                <span class="player-name">${entry.user_email}</span>
-                                <span class="player-time">${entry.formatted_time}</span>
-                            </div>`;
-                    });
-                    
-                    leaderboardHTML += '</div></div>';
-                });
-            }
-            
-            leaderboardContent.innerHTML = leaderboardHTML;
-            
+            const data = await response.json();
+            return data.leaderboard;
         } catch (error) {
-            console.error('Failed to load leaderboard:', error);
-            const leaderboardContent = document.getElementById('leaderboardContent');
-            leaderboardContent.innerHTML = `
-                <div class="no-data-message">
-                    ❌ Failed to load leaderboard<br>
-                    <small>Error: ${error.message}</small><br>
-                    <small>Make sure the server is running on localhost:5000</small>
-                </div>`;
+            console.error('Failed to fetch leaderboard:', error);
+            return [];
         }
     }
 
@@ -256,7 +201,7 @@ function updateAuthButtons() {
     leaderboardBtn.addEventListener('click', function() {
         playPixelSound();
         console.log('Leaderboard button clicked - Show leaderboard!');
-        showLeaderboard();
+        showLeaderboard(); // ✅ Change this to showLeaderboard instead of fetchLeaderboard
     });
 
     function loadControlSettings() {
@@ -464,8 +409,82 @@ function updateAuthButtons() {
     // ✅ Ajoute l'event listener pour le bouton refresh
     document.getElementById('refreshLeaderboard').addEventListener('click', function() {
         playPixelSound();
-        showLeaderboard(); // Recharge les données
+        showLeaderboard(); // ✅ This should call showLeaderboard, not just reload data
     });
     
     console.log('Landing page initialized! Use window.landingPageAPI to interact with it.');
+
+    // ✅ Fix the showLeaderboard function
+    async function showLeaderboard() {
+        try {
+            const leaderboardForm = document.getElementById('leaderboardForm');
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            
+            leaderboardForm.classList.remove('hidden');
+            document.querySelector('.button-container').classList.add('hidden');
+            document.querySelector('.secondary-buttons').classList.add('hidden');
+            
+            leaderboardContent.innerHTML = '<div class="loading-message">Loading leaderboard...</div>';
+            
+            const leaderboardData = await fetchLeaderboard();
+            
+            let leaderboardHTML = '';
+            
+            if (!leaderboardData || leaderboardData.length === 0) {
+                leaderboardHTML = '<div class="no-data-message">No times recorded yet. Be the first to complete a level!</div>';
+            } else {
+                const levels = {};
+                leaderboardData.forEach(entry => {
+                    if (!levels[entry.level]) {
+                        levels[entry.level] = [];
+                    }
+                    levels[entry.level].push(entry);
+                });
+                
+                Object.keys(levels).sort((a, b) => parseInt(a) - parseInt(b)).forEach(level => {
+                    leaderboardHTML += `
+                        <div class="level-section">
+                            <h3>🎮 Level 1 🎮</h3>
+                            <div class="leaderboard-entries">`;
+                
+                    levels[level].slice(0, 10).forEach((entry, index) => {
+                        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<span class="rank-badge">${index + 1}</span>`;
+                        // ✅ Use formatTime helper function instead of non-existent formatted_time
+                        leaderboardHTML += `
+                            <div class="leaderboard-entry">
+                                <span class="medal">${medal}</span>
+                                <span class="player-name">${entry.user_email}</span>
+                                <span class="player-time">${formatTime(entry.completion_time)}</span>
+                            </div>`;
+                    });
+                    
+                    leaderboardHTML += '</div></div>';
+                });
+            }
+            
+            leaderboardContent.innerHTML = leaderboardHTML;
+            
+        } catch (error) {
+            console.error('Failed to load leaderboard:', error);
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            leaderboardContent.innerHTML = `
+                <div class="no-data-message">
+                    ❌ Failed to load leaderboard<br>
+                    <small>Error: ${error.message}</small><br>
+                    <small>Make sure the server is running on localhost:5000</small>
+                </div>`;
+        }
+    }
+
+    // ✅ Add helper function to format time
+    function formatTime(timeMs) {
+        if (!timeMs) return 'N/A';
+        
+        const totalMs = Math.floor(timeMs);
+        const minutes = Math.floor(totalMs / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const milliseconds = totalMs % 1000;
+        
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(3, '0')}`;
+    }
 });

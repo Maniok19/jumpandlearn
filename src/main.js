@@ -82,16 +82,31 @@ async function getUserProgress() {
   return 1; // Par défaut, map 1
 }
 
-export async function saveUserProgress(level) {
-  const token = localStorage.getItem('token');
-  await fetch('http://localhost:5000/api/v1/progress/', {
-	  method: 'POST',
-	  headers: {
-		  'Content-Type': 'application/json',
-		  'Authorization': 'Bearer ' + token
-	  },
-	  body: JSON.stringify({ level })
-  });
+export async function saveUserProgress(level, completionTime = null) {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const payload = { level };
+        if (completionTime !== null) {
+            payload.completion_time = completionTime;
+        }
+
+        const response = await fetch('http://localhost:5000/api/v1/progress/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            console.log('Progress saved successfully');
+        }
+    } catch (error) {
+        console.error('Failed to save progress:', error);
+    }
 }
 
 let selectedLevel = localStorage.getItem('selectedLevel');

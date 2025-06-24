@@ -7,6 +7,11 @@ export default class Level1Scene extends Phaser.Scene {
         this.scoreText = null;
         this.startX= 0;
         this.isDead = false;
+        // Add timer properties
+        this.startTime = 0;
+        this.elapsedTime = 0;
+        this.timerText = null;
+        this.timerStopped = false;
     }
 
     init(data) {
@@ -47,6 +52,11 @@ export default class Level1Scene extends Phaser.Scene {
         this.rightKey = controls.rightKey;
         
         this.isDead = false;
+        
+        // Initialize timer
+        this.startTime = this.time.now;
+        this.elapsedTime = 0;
+        this.timerStopped = false;
         
         // ✅ Stocke la map comme propriété de l'instance
         this.map = this.make.tilemap({ key: 'level1' });
@@ -187,6 +197,13 @@ export default class Level1Scene extends Phaser.Scene {
             16, 16, 
             'Score: 0', 
             { fontFamily: '"Press Start 2P"', fontSize: '16px', fill: '#ffd700' }
+        ).setScrollFactor(0).setDepth(100);
+
+        // Add timer text
+        this.timerText = this.add.text(
+            16, 40, 
+            'Time: 00:00:000', 
+            { fontFamily: '"Press Start 2P"', fontSize: '16px', fill: '#00ff00' }
         ).setScrollFactor(0).setDepth(100);
       
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -846,6 +863,12 @@ export default class Level1Scene extends Phaser.Scene {
     update() {
         if (this.isDead) return;
 
+        // Update timer if not stopped
+        if (!this.timerStopped) {
+            this.elapsedTime = this.time.now - this.startTime;
+            this.updateTimerDisplay();
+        }
+
         // Update moving platform
         this.updateMovingPlatform();
 
@@ -882,6 +905,32 @@ export default class Level1Scene extends Phaser.Scene {
         }
         this.score = Math.floor(this.maxDistance) * 10;
         this.scoreText.setText('Score: ' + this.score);
+    }
+
+    // New method to update timer display
+    updateTimerDisplay() {
+        const totalMs = Math.floor(this.elapsedTime);
+        const minutes = Math.floor(totalMs / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const milliseconds = totalMs % 1000;
+
+        const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(3, '0')}`;
+        this.timerText.setText('Time: ' + formattedTime);
+    }
+
+    // New method to stop timer
+    stopTimer() {
+        this.timerStopped = true;
+    }
+
+    // New method to get final time
+    getFinalTime() {
+        const totalMs = Math.floor(this.elapsedTime);
+        const minutes = Math.floor(totalMs / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const milliseconds = totalMs % 1000;
+
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(3, '0')}`;
     }
 
     async showQuestionUI(questionId, onCorrect = null) {
@@ -922,6 +971,7 @@ export default class Level1Scene extends Phaser.Scene {
 
     showGameOverUI() {
         this.isDead = true; // Marque le joueur comme mort
+        this.stopTimer(); // Stop timer on game over
         this.physics.world.pause();
         this.input.keyboard.enabled = false;
     
@@ -955,6 +1005,11 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     showVictoryUI() {
+        // Stop timer when reaching victory
+        this.stopTimer();
+        const finalTime = this.getFinalTime();
+        const finalTimeMs = this.elapsedTime; // Get time in milliseconds
+        
         // Pause le jeu si besoin
         this.physics.world.pause();
         this.input.keyboard.enabled = false;
@@ -964,6 +1019,7 @@ export default class Level1Scene extends Phaser.Scene {
         ui.className = 'question-ui'; // Réutilise le style popup
         ui.innerHTML = `
           <div class="question-text">Well done ! Level completed</div>
+          <div class="question-text" style="font-size: 14px; margin-top: 10px;">Final Time: ${finalTime}</div>
           <div class="question-choices">
             <button id="next-level-btn">Next level</button>
           </div>
@@ -975,7 +1031,8 @@ export default class Level1Scene extends Phaser.Scene {
             // Transition visuelle
             this.cameras.main.fadeOut(800, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', async () => {
-                await saveUserProgress(this.level + 1);
+                // Save progress with completion time
+                await saveUserProgress(this.level + 1, finalTimeMs);
                 this.scene.start('Level2Scene', { level: this.level + 1 });
             });
         };
