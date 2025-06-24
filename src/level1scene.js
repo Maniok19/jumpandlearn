@@ -58,6 +58,17 @@ export default class Level1Scene extends Phaser.Scene {
         this.elapsedTime = 0;
         this.timerStopped = false;
         
+        // ✅ Add wall jump properties
+        this.wallJumpCooldown = 0;
+        this.isWallSliding = false;
+        this.wallSlidingSide = 0; // -1 for left wall, 1 for right wall
+        this.wallSlideSpeed = 50; // Reduced falling speed when wall sliding
+        this.wallJumpForceX = 200; // Horizontal force when wall jumping
+        this.wallJumpForceY = -280; // Vertical force when wall jumping
+        this.wallJumpTime = 300; // Time in ms to maintain wall jump force
+        this.wallJumpTimer = 0;
+        this.wallJumpDirection = 0;
+        
         // ✅ Stocke la map comme propriété de l'instance
         this.map = this.make.tilemap({ key: 'level1' });
 
@@ -313,12 +324,38 @@ export default class Level1Scene extends Phaser.Scene {
                 { tilesetName: 'tileset_spring', localId: 24 }  // Right tile
             ]
         };
+        const platformConfig5 = {
+            // Starting tile position
+            startTileX: 13,
+            startTileY: 25,
+            // Platform size in tiles
+            widthInTiles: 1,
+            heightInTiles: 7,
+            // Movement properties
+            speed: 50,           // Movement speed in pixels per second
+            direction: 'vertical', // 'horizontal' or 'vertical'
+            // Movement boundaries (in tile coordinates)
+            minTileX: 13,         // Leftmost position (for horizontal movement)
+            maxTileX: 13,        // Rightmost position (for horizontal movement)
+            minTileY: 25,         // Topmost position (for vertical movement)
+            maxTileY: 28,        // Bottommost position (for vertical movement)
+            // Visual tiles to use
+            tiles: [
+                { tilesetName: 'tileset_spring', localId: 23 },
+                { tilesetName: 'tileset_spring', localId: 23 },
+                { tilesetName: 'tileset_spring', localId: 23 },
+                { tilesetName: 'tileset_spring', localId: 23 },
+                { tilesetName: 'tileset_spring', localId: 23 },
+                { tilesetName: 'tileset_spring', localId: 23 }, // Left tile
+                { tilesetName: 'tileset_spring', localId: 24 }  // Right tile
+            ]
+        };
 
         // Create all four platforms
         this.movingPlatforms = [];
         this.platformSprites = [];
         
-        [platformConfig1, platformConfig2, platformConfig3, platformConfig4].forEach((platformConfig, index) => {
+        [platformConfig1, platformConfig2, platformConfig3, platformConfig4, platformConfig5].forEach((platformConfig, index) => {
             // Convert tile position to pixel position
             const startX = platformConfig.startTileX * 16 + (platformConfig.widthInTiles * 16) / 2;
             const startY = platformConfig.startTileY * 16 + (platformConfig.heightInTiles * 16) / 2;
@@ -878,25 +915,54 @@ export default class Level1Scene extends Phaser.Scene {
         // ✅ Update pushable obstacles
         this.updatePushableObstacles();
 
-        const player = this.player;
-        
-        if (this.leftKey.isDown) {
-            player.setVelocityX(-160);
-            player.anims.play('run', true);
-            player.setFlipX(true);
-        } else if (this.rightKey.isDown) {
-            player.setVelocityX(160);
-            player.anims.play('run', true);
-            player.setFlipX(false);
-        } else {
-            player.setVelocityX(0);
-            player.anims.play('idle', true);
+        // ✅ Update wall jump timers
+        if (this.wallJumpCooldown > 0) {
+            this.wallJumpCooldown -= this.game.loop.delta;
         }
         
-        if (this.jumpKey.isDown && player.body.onFloor()) {
-            player.setVelocityY(-300);
-            player.anims.play('jump', true);
-            this.playerOnPlatform = false;
+        if (this.wallJumpTimer > 0) {
+            this.wallJumpTimer -= this.game.loop.delta;
+        }
+
+        // ✅ Update wall sliding
+        this.updateWallSliding();
+
+        const player = this.player;
+        
+        // ✅ Modified movement controls to work with wall jumping
+        if (this.leftKey.isDown) {
+            // Only apply left movement if not in wall jump state or wall jump allows it
+            if (this.wallJumpTimer <= 0 || this.wallJumpDirection <= 0) {
+                player.setVelocityX(-160);
+                player.anims.play('run', true);
+                player.setFlipX(true);
+            }
+        } else if (this.rightKey.isDown) {
+            // Only apply right movement if not in wall jump state or wall jump allows it
+            if (this.wallJumpTimer <= 0 || this.wallJumpDirection >= 0) {
+                player.setVelocityX(160);
+                player.anims.play('run', true);
+                player.setFlipX(false);
+            }
+        } else {
+            // Only stop horizontal movement if not in wall jump state
+            if (this.wallJumpTimer <= 0) {
+                player.setVelocityX(0);
+                player.anims.play('idle', true);
+            }
+        }
+        
+        // ✅ Modified jump controls for wall jumping
+        if (this.jumpKey.isDown) {
+            if (player.body.onFloor()) {
+                // Normal ground jump
+                player.setVelocityY(-300);
+                player.anims.play('jump', true);
+                this.playerOnPlatform = false;
+            } else if (this.isWallSliding) {
+                // Wall jump
+                this.performWallJump();
+            }
         }
 
         const distance = Math.max(0, player.x - this.startX);
@@ -1133,6 +1199,182 @@ export default class Level1Scene extends Phaser.Scene {
                 ease: 'Power2',
                 onComplete: () => particle.destroy()
             });
+        }
+   }
+
+    // ✅ Add new method to check for wall collision
+    checkWallCollision() {
+        if (!this.player.body) return false;
+        
+        const playerBody = this.player.body;
+        const tileSize = 16;
+        
+        // Get collision layer
+        const collisionLayer = this.map.getLayer('colision').tilemapLayer;
+        
+        // Check tiles to the left and right of the player
+        const playerCenterY = playerBody.center.y;
+        const checkTopY = Math.floor((playerBody.top + 2) / tileSize);
+        const checkBottomY = Math.floor((playerBody.bottom - 2) / tileSize);
+        
+        // Check left wall
+        const leftTileX = Math.floor((playerBody.left - 1) / tileSize);
+        let leftWallFound = false;
+        for (let y = checkTopY; y <= checkBottomY; y++) {
+            const tile = collisionLayer.getTileAt(leftTileX, y);
+            if (tile && tile.collides) {
+                leftWallFound = true;
+                break;
+            }
+        }
+        
+        // Check right wall
+        const rightTileX = Math.floor((playerBody.right + 1) / tileSize);
+        let rightWallFound = false;
+        for (let y = checkTopY; y <= checkBottomY; y++) {
+            const tile = collisionLayer.getTileAt(rightTileX, y);
+            if (tile && tile.collides) {
+                rightWallFound = true;
+                break;
+            }
+        }
+        
+        // Return wall side: -1 for left, 1 for right, 0 for no wall
+        if (leftWallFound && this.leftKey.isDown) return -1;
+        if (rightWallFound && this.rightKey.isDown) return 1;
+        
+        return 0;
+    }
+
+    // ✅ Add new method to handle wall sliding
+    updateWallSliding() {
+        const wallSide = this.checkWallCollision();
+        
+        // Check if conditions are met for wall sliding
+        const canWallSlide = !this.player.body.onFloor() && 
+                            this.player.body.velocity.y > 0 && 
+                            wallSide !== 0 &&
+                            this.wallJumpTimer <= 0;
+        
+        if (canWallSlide) {
+            this.isWallSliding = true;
+            this.wallSlidingSide = wallSide;
+            
+            // Reduce falling speed
+            if (this.player.body.velocity.y > this.wallSlideSpeed) {
+                this.player.body.velocity.y = this.wallSlideSpeed;
+            }
+            
+            // Add visual effect for wall sliding
+            this.addWallSlideEffect();
+            
+        } else {
+            this.isWallSliding = false;
+            this.wallSlidingSide = 0;
+        }
+    }
+
+    // ✅ Add visual effect for wall sliding
+    addWallSlideEffect() {
+        // Only create particles occasionally to avoid performance issues
+        if (Math.random() < 0.1) {
+            const offsetX = this.wallSlidingSide === -1 ? -8 : 8;
+            const particle = this.add.circle(
+                this.player.x + offsetX,
+                this.player.y + Phaser.Math.Between(-10, 10),
+                2,
+                0xcccccc
+            );
+            
+            this.tweens.add({
+                targets: particle,
+                alpha: 0,
+                x: particle.x + (this.wallSlidingSide * -10),
+                y: particle.y + 20,
+                duration: 400,
+                ease: 'Power2',
+                onComplete: () => particle.destroy()
+            });
+        }
+    }
+
+    // ✅ Add method to handle wall jumping
+    performWallJump() {
+        if (this.isWallSliding && this.wallJumpCooldown <= 0) {
+            // Set wall jump forces
+            this.player.body.velocity.x = this.wallJumpForceX * -this.wallSlidingSide;
+            this.player.body.velocity.y = this.wallJumpForceY;
+            
+            // Set wall jump state
+            this.wallJumpTimer = this.wallJumpTime;
+            this.wallJumpDirection = -this.wallSlidingSide;
+            this.wallJumpCooldown = 200; // Cooldown to prevent spam
+            
+            // Reset wall sliding
+            this.isWallSliding = false;
+            this.wallSlidingSide = 0;
+            
+            // Play jump animation
+            this.player.anims.play('jump', true);
+            
+            // Set player facing direction
+            this.player.setFlipX(this.wallJumpDirection < 0);
+            
+            // Add visual effect
+            this.addWallJumpEffect();
+            
+            // Play sound effect
+            this.playWallJumpSound();
+        }
+    }
+
+    // ✅ Add visual effect for wall jump
+    addWallJumpEffect() {
+        const offsetX = this.wallJumpDirection > 0 ? -12 : 12;
+        
+        // Create burst effect
+        for (let i = 0; i < 6; i++) {
+            const particle = this.add.circle(
+                this.player.x + offsetX,
+                this.player.y,
+                3,
+                0xffffff
+            );
+            
+            const angle = Phaser.Math.Between(-60, 60) * Phaser.Math.DEG_TO_RAD;
+            const speed = Phaser.Math.Between(50, 100);
+            
+            this.tweens.add({
+                targets: particle,
+                alpha: 0,
+                x: particle.x + Math.cos(angle + (this.wallJumpDirection > 0 ? 0 : Math.PI)) * speed,
+                y: particle.y + Math.sin(angle) * speed,
+                duration: 500,
+                ease: 'Power2',
+                onComplete: () => particle.destroy()
+            });
+        }
+    }
+
+    // ✅ Add sound effect for wall jump
+    playWallJumpSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        } catch (e) {
+            // Ignore audio errors
         }
     }
 }
