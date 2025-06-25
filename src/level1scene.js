@@ -34,8 +34,8 @@ export default class Level1Scene extends Phaser.Scene {
         this.timerStopped = false;
 
         // Enhanced jump mechanics
-        this.jumpForce = -350;
-        this.minJumpForce = -150;
+        this.jumpForce = -250;
+        this.minJumpForce = -100;
         this.coyoteTime = 150;
         this.jumpBuffer = 150;
         this.lastGroundedTime = 0;
@@ -51,7 +51,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.wallSlidingSide = 0;
         this.wallSlideSpeed = 50;
         this.wallJumpForceX = 200;
-        this.wallJumpForceY = -280;
+        this.wallJumpForceY = -250;
         this.wallJumpTime = 300;
         this.wallJumpTimer = 0;
         this.wallJumpDirection = 0;
