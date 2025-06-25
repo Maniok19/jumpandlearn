@@ -138,8 +138,10 @@ class InGameSettingsManager {
         volumeSlider.value = savedVolume;
         volumeValue.textContent = savedVolume + '%';
         
+        // Appliquer le volume à la musique si elle existe
         if (scene.backgroundMusic) {
-            scene.backgroundMusic.setVolume(parseFloat(savedVolume) / 100);
+            const volumeFloat = parseFloat(savedVolume) / 100;
+            scene.backgroundMusic.setVolume(volumeFloat);
         }
     }
 

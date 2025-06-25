@@ -120,10 +120,7 @@ export default class Level1Scene extends Phaser.Scene {
         }
 
         // Le contenu spécifique au niveau 1
-        this.updateTimer();
-        this.updateInteractiveObjects();
-        this.updatePlayerMovement();
-        this.updateScore();
+        this.levelUpdate();
     }
 
     levelUpdate() {
@@ -190,8 +187,16 @@ export default class Level1Scene extends Phaser.Scene {
     setupPlayer() {
         this.player = this.physics.add.sprite(6 * 16 + 8, 30 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
-        this.player.setSize(15, 15);
-        this.player.setOffset(10, 10);
+        
+        // Hitbox de base
+        this.player.setSize(13, 15);
+        this.player.setOffset(8, 10);
+        
+        // Stocker les paramètres de hitbox pour chaque direction
+        this.hitboxParams = {
+            right: { width: 13, height: 15, offsetX: 8, offsetY: 10 },
+            left: { width: 13, height: 15, offsetX: 11, offsetY: 10 }  // Décalage ajusté pour la gauche
+        };
         
         // Setup collisions
         this.physics.add.collider(this.player, this.map.getLayer('colision').tilemapLayer);
@@ -205,7 +210,7 @@ export default class Level1Scene extends Phaser.Scene {
     setupQuestionZones() {
         this.questionZonesData = [
             { 
-                x: 55 * 16 + 8, y: 30 * 16 + 8, width: 1 * 16, height: 1 * 16, 
+                x: 55 * 16 + 8, y: 503, width: 1 * 16, height: 1 * 16, 
                 questionId: "1b86380f-b7f8-4eba-a415-5bb3339403fa",
                 bridge: { 
                     startX: 57, endX: 62, y: 31, 
@@ -213,7 +218,7 @@ export default class Level1Scene extends Phaser.Scene {
                 }
             },
             { 
-                x: 85 * 16 + 8, y: 30 * 16 + 8, width: 1 * 16, height: 1 * 16, 
+                x: 85 * 16 + 8, y: 503, width: 1 * 16, height: 1 * 16, 
                 questionId: "434dd4c6-9ccd-41c4-9c61-627cc6d87c04",
                 bridge: { 
                     startX: 87, endX: 92, y: 31, 
@@ -377,12 +382,18 @@ export default class Level1Scene extends Phaser.Scene {
                 player.setVelocityX(-160);
                 player.anims.play('run', true);
                 player.setFlipX(true);
+                
+                // Ajuster la hitbox pour la direction gauche
+                this.updatePlayerHitbox('left');
             }
         } else if (this.rightKey.isDown) {
             if (this.wallJumpTimer <= 0 || this.wallJumpDirection >= 0) {
                 player.setVelocityX(160);
                 player.anims.play('run', true);
                 player.setFlipX(false);
+                
+                // Ajuster la hitbox pour la direction droite
+                this.updatePlayerHitbox('right');
             }
         } else {
             if (this.wallJumpTimer <= 0) {
@@ -390,6 +401,12 @@ export default class Level1Scene extends Phaser.Scene {
                 player.anims.play('idle', true);
             }
         }
+    }
+
+    updatePlayerHitbox(direction) {
+        const params = this.hitboxParams[direction];
+        this.player.setSize(params.width, params.height);
+        this.player.setOffset(params.offsetX, params.offsetY);
     }
 
     updateScore() {
@@ -1131,10 +1148,14 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupMusic() {
-    // Créer l'objet audio
+    // Récupérer le volume sauvegardé ou utiliser la valeur par défaut
+    const savedVolume = localStorage.getItem('musicVolume') || '10';
+    const volumeValue = parseFloat(savedVolume) / 100;
+    
+    // Créer l'objet audio avec le volume sauvegardé
     this.backgroundMusic = this.sound.add('level1_music', {
-        volume: 0.1,    // Volume à 50%
-        loop: true      // Jouer en boucle
+        volume: volumeValue,    // Utilise le volume sauvegardé
+        loop: true             // Jouer en boucle
     });
     
     // Démarrer la musique
