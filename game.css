@@ -113,3 +113,215 @@ html, body {
         padding: 10px 0;
     }
 }
+
+/* In-Game Settings UI */
+.in-game-settings-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    font-family: 'Press Start 2P', monospace;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.in-game-settings-ui .settings-inner {
+    background: #2c3e95;
+    border: 4px solid #ffd700;
+    box-shadow: 0 0 20px #000, 2px 2px 0 #000;
+    padding: 32px 24px;
+    min-width: 450px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1;
+}
+
+.volume-setting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    color: #ffd700;
+    width: 100%;
+}
+
+.volume-setting label {
+    flex: 1;
+    text-align: left;
+}
+
+.volume-slider {
+    flex: 2;
+    margin: 0 10px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: #000;
+    border: 2px solid #ffd700;
+    outline: none;
+    border-radius: 0;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ffd700;
+    border: 2px solid #000;
+    cursor: pointer;
+    border-radius: 0;
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #ffd700;
+    border: 2px solid #000;
+    cursor: pointer;
+    border-radius: 0;
+}
+
+#volumeValue {
+    min-width: 40px;
+    text-align: right;
+    font-size: 0.7rem;
+}
+
+/* Responsive pour les settings in-game */
+@media (max-width: 600px) {
+    .in-game-settings-ui .settings-inner {
+        min-width: 0;
+        width: 95vw;
+        padding: 18px 2vw;
+    }
+    
+    .volume-setting {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .volume-slider {
+        width: 100%;
+        margin: 8px 0;
+    }
+}
+
+/* Amélioration des contrôles existants pour l'in-game */
+.in-game-settings-ui .control-setting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    color: #ffd700;
+    width: 100%;
+}
+
+.in-game-settings-ui .control-setting label {
+    flex: 1;
+    text-align: left;
+}
+
+.in-game-settings-ui .control-key {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    padding: 8px 12px;
+    background: #000;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    cursor: pointer;
+    min-width: 120px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.in-game-settings-ui .control-key:hover {
+    background: #ffd700;
+    color: #000;
+}
+
+.in-game-settings-ui .control-key.listening {
+    background: #ff0000;
+    color: #fff;
+    animation: blink 0.5s infinite;
+}
+
+.in-game-settings-ui .settings-title {
+    font-size: 1.2rem;
+    color: #ffd700;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.5; }
+}
+
+.pixel-button {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1rem;
+    padding: 12px 24px;
+    background: #2c3e95;
+    color: #ffd700;
+    border: none;
+    position: relative;
+    cursor: pointer;
+    min-width: 180px;
+    margin-top: 10px;
+    text-align: center;
+    box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s;
+}
+
+.pixel-button::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: #ffd700;
+    box-shadow: 2px 2px 0 #000;
+    z-index: -1;
+}
+
+.pixel-button::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: #000000;
+    z-index: -2;
+}
+
+.pixel-button:hover {
+    background: #2c3e95;
+    color: #2c3e95;
+    transform: translateY(-2px);
+}
+
+.pixel-button:active {
+    transform: translateY(0px);
+}

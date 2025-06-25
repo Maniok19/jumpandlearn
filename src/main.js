@@ -5,7 +5,7 @@ import Level2Scene from './level2scene.js';
 class ControlsManager {
   static getControls() {
       return JSON.parse(localStorage.getItem('gameControls')) || {
-          jump: 'ArrowUp',
+          jump: 'Space',
           left: 'ArrowLeft',
           right: 'ArrowRight'
       };
@@ -62,13 +62,274 @@ class ControlsManager {
       return {
           jumpKey: scene.input.keyboard.addKey(keyMap[controls.jump] || controls.jump),
           leftKey: scene.input.keyboard.addKey(keyMap[controls.left] || controls.left),
-          rightKey: scene.input.keyboard.addKey(keyMap[controls.right] || controls.right)
+          rightKey: scene.input.keyboard.addKey(keyMap[controls.right] || controls.right),
+          escapeKey: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
       };
   }
 }
 
-// Exporte la classe pour l'utiliser dans les scènes
-export { ControlsManager };
+// Nouvelle classe pour gérer les settings in-game
+class InGameSettingsManager {
+    static showSettings(scene) {
+        // Pause le jeu
+        scene.physics.world.pause();
+        scene.input.keyboard.enabled = false;
+        this.pauseTimer(scene);
+
+        const settingsUI = document.createElement('div');
+        settingsUI.className = 'in-game-settings-ui';
+        settingsUI.innerHTML = `
+            <div class="settings-inner">
+                <div class="settings-title">⚙ SETTINGS ⚙</div>
+                <div class="settings-content">
+                    <div class="control-setting">
+                        <label>Jump:</label>
+                        <button class="control-key" id="gameJumpKey" data-control="jump">SPACE</button>
+                    </div>
+                    <div class="control-setting">
+                        <label>Move Left:</label>
+                        <button class="control-key" id="gameLeftKey" data-control="left">LEFT ARROW</button>
+                    </div>
+                    <div class="control-setting">
+                        <label>Move Right:</label>
+                        <button class="control-key" id="gameRightKey" data-control="right">RIGHT ARROW</button>
+                    </div>
+                    <div class="volume-setting">
+                        <label>Music Volume:</label>
+                        <input type="range" id="musicVolume" min="0" max="100" value="10" class="volume-slider">
+                        <span id="volumeValue">10%</span>
+                    </div>
+                </div>
+                <div class="settings-buttons">
+                    <button class="pixel-button" id="resetGameControls">Reset Default</button>
+                    <button class="pixel-button" id="resumeGame">Resume Game</button>
+                    <button class="pixel-button" id="quitToMenu">Quit to Menu</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(settingsUI);
+        
+        // Charger les settings actuels
+        this.loadControlSettings();
+        this.loadVolumeSettings(scene);
+        
+        // Event listeners
+        this.setupSettingsListeners(settingsUI, scene);
+    }
+
+    static loadControlSettings() {
+        const controls = JSON.parse(localStorage.getItem('gameControls')) || {
+            jump: 'Space',
+            left: 'ArrowLeft', 
+            right: 'ArrowRight'
+        };
+        
+        document.getElementById('gameJumpKey').textContent = this.getKeyDisplayName(controls.jump);
+        document.getElementById('gameLeftKey').textContent = this.getKeyDisplayName(controls.left);
+        document.getElementById('gameRightKey').textContent = this.getKeyDisplayName(controls.right);
+    }
+
+    static loadVolumeSettings(scene) {
+        const savedVolume = localStorage.getItem('musicVolume') || '10';
+        const volumeSlider = document.getElementById('musicVolume');
+        const volumeValue = document.getElementById('volumeValue');
+        
+        volumeSlider.value = savedVolume;
+        volumeValue.textContent = savedVolume + '%';
+        
+        if (scene.backgroundMusic) {
+            scene.backgroundMusic.setVolume(parseFloat(savedVolume) / 100);
+        }
+    }
+
+    static setupSettingsListeners(settingsUI, scene) {
+        // Event listeners pour les contrôles
+        document.querySelectorAll('#gameJumpKey, #gameLeftKey, #gameRightKey').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const control = e.target.dataset.control;
+                e.target.textContent = 'Press key...';
+                e.target.classList.add('listening');
+                
+                const handleKeyPress = (keyEvent) => {
+                    keyEvent.preventDefault();
+                    const newKey = keyEvent.code;
+                    
+                    // Sauvegarde le nouveau contrôle
+                    const controls = JSON.parse(localStorage.getItem('gameControls')) || {};
+                    controls[control] = newKey;
+                    localStorage.setItem('gameControls', JSON.stringify(controls));
+                    
+                    // Met à jour l'affichage
+                    e.target.textContent = this.getKeyDisplayName(newKey);
+                    e.target.classList.remove('listening');
+                    
+                    // Recharge les contrôles dans le jeu
+                    this.reloadControls(scene);
+                    
+                    // Retire l'écouteur
+                    document.removeEventListener('keydown', handleKeyPress);
+                };
+                
+                document.addEventListener('keydown', handleKeyPress);
+            });
+        });
+
+        // Volume slider
+        const volumeSlider = document.getElementById('musicVolume');
+        const volumeValue = document.getElementById('volumeValue');
+        
+        volumeSlider.addEventListener('input', (e) => {
+            const volume = e.target.value;
+            volumeValue.textContent = volume + '%';
+            localStorage.setItem('musicVolume', volume);
+            
+            if (scene.backgroundMusic) {
+                scene.backgroundMusic.setVolume(parseFloat(volume) / 100);
+            }
+        });
+
+        // Reset controls
+        document.getElementById('resetGameControls').addEventListener('click', () => {
+            const defaultControls = {
+                jump: 'Space',
+                left: 'ArrowLeft',
+                right: 'ArrowRight'
+            };
+            localStorage.setItem('gameControls', JSON.stringify(defaultControls));
+            this.loadControlSettings();
+            this.reloadControls(scene);
+        });
+
+        // Resume game
+        document.getElementById('resumeGame').addEventListener('click', () => {
+            this.resumeFromSettings(settingsUI, scene);
+        });
+
+        // Quit to menu
+        document.getElementById('quitToMenu').addEventListener('click', () => {
+            settingsUI.remove();
+            this.stopMusic(scene);
+            window.location.href = "/";
+        });
+
+        // Échap pour fermer les settings
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.resumeFromSettings(settingsUI, scene);
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+    }
+
+    static resumeFromSettings(settingsUI, scene) {
+        settingsUI.remove();
+        scene.input.keyboard.enabled = true;
+        scene.physics.world.resume();
+        this.resumeTimer(scene);
+        this.resumeMusic(scene);
+    }
+
+    static reloadControls(scene) {
+        // Recharge les contrôles depuis localStorage
+        const controls = ControlsManager.createKeys(scene);
+        scene.jumpKey = controls.jumpKey;
+        scene.leftKey = controls.leftKey;
+        scene.rightKey = controls.rightKey;
+        scene.escapeKey = controls.escapeKey;
+    }
+
+    static getKeyDisplayName(key) {
+        const keyNames = {
+            'Space': 'SPACE',
+            'Enter': 'ENTER',
+            'Escape': 'ESC',
+            'ArrowUp': 'UP ARROW',
+            'ArrowDown': 'DOWN ARROW',
+            'ArrowLeft': 'LEFT ARROW',
+            'ArrowRight': 'RIGHT ARROW',
+            'KeyA': 'A', 'KeyB': 'B', 'KeyC': 'C', 'KeyD': 'D', 'KeyE': 'E',
+            'KeyF': 'F', 'KeyG': 'G', 'KeyH': 'H', 'KeyI': 'I', 'KeyJ': 'J',
+            'KeyK': 'K', 'KeyL': 'L', 'KeyM': 'M', 'KeyN': 'N', 'KeyO': 'O',
+            'KeyP': 'P', 'KeyQ': 'Q', 'KeyR': 'R', 'KeyS': 'S', 'KeyT': 'T',
+            'KeyU': 'U', 'KeyV': 'V', 'KeyW': 'W', 'KeyX': 'X', 'KeyY': 'Y',
+            'KeyZ': 'Z',
+            'Digit0': '0', 'Digit1': '1', 'Digit2': '2', 'Digit3': '3', 'Digit4': '4',
+            'Digit5': '5', 'Digit6': '6', 'Digit7': '7', 'Digit8': '8', 'Digit9': '9'
+        };
+        
+        return keyNames[key] || key.replace('Key', '').replace('Digit', '').toUpperCase();
+    }
+
+    static pauseTimer(scene) {
+        if (scene.pauseTimer && typeof scene.pauseTimer === 'function') {
+            scene.pauseTimer();
+        } else {
+            scene.timerPaused = true;
+            scene.pausedTime = scene.time.now;
+        }
+    }
+
+    static resumeTimer(scene) {
+        if (scene.resumeTimer && typeof scene.resumeTimer === 'function') {
+            scene.resumeTimer();
+        } else if (scene.timerPaused) {
+            const pauseDuration = scene.time.now - scene.pausedTime;
+            scene.startTime += pauseDuration;
+            scene.timerPaused = false;
+        }
+    }
+
+    static pauseMusic(scene) {
+        if (scene.backgroundMusic && scene.backgroundMusic.isPlaying) {
+            scene.backgroundMusic.pause();
+        }
+    }
+
+    static resumeMusic(scene) {
+        if (scene.backgroundMusic && scene.backgroundMusic.isPaused) {
+            scene.backgroundMusic.resume();
+        }
+    }
+
+    static stopMusic(scene) {
+        if (scene.backgroundMusic && scene.backgroundMusic.isPlaying) {
+            scene.backgroundMusic.stop();
+        }
+    }
+}
+
+// Classe de base pour tous les niveaux
+class BaseGameScene extends Phaser.Scene {
+    constructor(key) {
+        super(key);
+    }
+
+    setupInput() {
+        const controls = ControlsManager.createKeys(this);
+        this.jumpKey = controls.jumpKey;
+        this.leftKey = controls.leftKey;
+        this.rightKey = controls.rightKey;
+        this.escapeKey = controls.escapeKey;
+    }
+
+    update() {
+        // Vérifier si Échap est pressé pour ouvrir les settings
+        if (this.escapeKey && Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+            InGameSettingsManager.showSettings(this);
+            return;
+        }
+
+        // Appeler la méthode update spécifique au niveau si elle existe
+        if (this.levelUpdate) {
+            this.levelUpdate();
+        }
+    }
+}
+
+// Exporter les classes
+export { ControlsManager, InGameSettingsManager, BaseGameScene };
 
 async function getUserProgress() {
   const token = localStorage.getItem('token');

@@ -1,4 +1,4 @@
-import { saveUserProgress, ControlsManager } from './main.js';
+import { saveUserProgress, ControlsManager, InGameSettingsManager } from './main.js';
 import { PendulumObstacles } from './PendulumObstacles.js';
 import { MovingPlatforms } from './MovingPlatforms.js';
 
@@ -94,6 +94,8 @@ export default class Level1Scene extends Phaser.Scene {
         this.load.spritesheet('player', 'assets/personnage/personnage.png', { 
             frameWidth: 32, frameHeight: 32 
         });
+
+        this.load.audio('level1_music', 'assets/song/level1_music.mp3');
     }
 
     create() {
@@ -105,11 +107,27 @@ export default class Level1Scene extends Phaser.Scene {
         this.setupUI();
         this.setupCamera();
         this.createInteractiveObjects();
+        this.setupMusic();
     }
 
     update() {
         if (this.isDead) return;
 
+        // Gère la touche Échap pour les settings
+        if (this.escapeKey && Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+            InGameSettingsManager.showSettings(this);
+            return;
+        }
+
+        // Le contenu spécifique au niveau 1
+        this.updateTimer();
+        this.updateInteractiveObjects();
+        this.updatePlayerMovement();
+        this.updateScore();
+    }
+
+    levelUpdate() {
+        // Le contenu spécifique au niveau 1
         this.updateTimer();
         this.updateInteractiveObjects();
         this.updatePlayerMovement();
@@ -121,10 +139,12 @@ export default class Level1Scene extends Phaser.Scene {
     // ===========================================
 
     setupInput() {
+        // Utilise directement ControlsManager
         const controls = ControlsManager.createKeys(this);
         this.jumpKey = controls.jumpKey;
         this.leftKey = controls.leftKey;
         this.rightKey = controls.rightKey;
+        this.escapeKey = controls.escapeKey;
     }
 
     setupMap() {
@@ -147,7 +167,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.setupDangerZones();
         
         // Setup end zone
-        this.endZone = this.add.rectangle(117 * 16 + 8, 27 * 16 + 8, 50, 50);
+        this.endZone = this.add.rectangle(17 * 16 + 8, 27 * 16 + 8, 50, 50);
         this.physics.add.existing(this.endZone, true);
     }
 
@@ -186,7 +206,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.questionZonesData = [
             { 
                 x: 55 * 16 + 8, y: 30 * 16 + 8, width: 1 * 16, height: 1 * 16, 
-                questionId: "53f42b04-48f2-4892-8029-0556d535d6fd",
+                questionId: "1b86380f-b7f8-4eba-a415-5bb3339403fa",
                 bridge: { 
                     startX: 57, endX: 62, y: 31, 
                     tileId: 10, tileset: 'tileset_world'
@@ -194,7 +214,7 @@ export default class Level1Scene extends Phaser.Scene {
             },
             { 
                 x: 85 * 16 + 8, y: 30 * 16 + 8, width: 1 * 16, height: 1 * 16, 
-                questionId: "b2475722-4796-40ef-a548-8968fbb1dfd2",
+                questionId: "434dd4c6-9ccd-41c4-9c61-627cc6d87c04",
                 bridge: { 
                     startX: 87, endX: 92, y: 31, 
                     tileId: 10, tileset: 'tileset_world'
@@ -299,8 +319,21 @@ export default class Level1Scene extends Phaser.Scene {
     // UPDATE METHODS
     // ===========================================
 
+    pauseTimer() {
+        this.timerPaused = true;
+        this.pausedTime = this.time.now;
+    }
+
+    resumeTimer() {
+        if (this.timerPaused) {
+            const pauseDuration = this.time.now - this.pausedTime;
+            this.startTime += pauseDuration;
+            this.timerPaused = false;
+        }
+    }
+
     updateTimer() {
-        if (!this.timerStopped) {
+        if (!this.timerStopped && !this.timerPaused) {
             this.elapsedTime = this.time.now - this.startTime;
             this.updateTimerDisplay();
         }
@@ -951,6 +984,7 @@ export default class Level1Scene extends Phaser.Scene {
     showGameOverUI() {
         this.isDead = true;
         this.stopTimer();
+        this.stopMusic();
         this.physics.world.pause();
         this.input.keyboard.enabled = false;
 
@@ -985,6 +1019,7 @@ export default class Level1Scene extends Phaser.Scene {
 
     showVictoryUI() {
         this.stopTimer();
+        this.stopMusic();
         const finalTime = this.getFinalTime();
         const finalTimeMs = this.elapsedTime;
         
@@ -1094,4 +1129,30 @@ export default class Level1Scene extends Phaser.Scene {
             });
         }
     }
+
+    setupMusic() {
+    // Créer l'objet audio
+    this.backgroundMusic = this.sound.add('level1_music', {
+        volume: 0.1,    // Volume à 50%
+        loop: true      // Jouer en boucle
+    });
+    
+    // Démarrer la musique
+    this.backgroundMusic.play();
+    }
+
+    stopMusic() {
+    if (this.backgroundMusic && this.backgroundMusic.isPlaying) {
+        // Fade out progressif avant d'arrêter
+        this.tweens.add({
+            targets: this.backgroundMusic,
+            volume: 0,
+            duration: 1000,
+            ease: 'Power2',
+            onComplete: () => {
+                this.backgroundMusic.stop();
+            }
+        });
+    }
+}
 }

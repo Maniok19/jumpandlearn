@@ -1,4 +1,6 @@
-import { saveUserProgress, ControlsManager } from './main.js';
+import { saveUserProgress, ControlsManager, InGameSettingsManager } from './main.js';
+import { PendulumObstacles } from './PendulumObstacles.js';
+import { MovingPlatforms } from './MovingPlatforms.js';
 
 export default class Level2Scene extends Phaser.Scene {
 	constructor() {
@@ -21,6 +23,7 @@ export default class Level2Scene extends Phaser.Scene {
 	}
 
 	create() {
+		this.setupInput();
 		const controls = ControlsManager.createKeys(this);
         this.jumpKey = controls.jumpKey;
         this.leftKey = controls.leftKey;
@@ -125,6 +128,12 @@ export default class Level2Scene extends Phaser.Scene {
 		if (this.isDead) return;
     
 		const player = this.player;
+
+		        // Gère la touche Échap pour les settings
+        if (this.escapeKey && Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+            InGameSettingsManager.showSettings(this);
+            return;
+        }
 		
 		if (this.leftKey.isDown) {
 			player.setVelocityX(-160);
@@ -245,4 +254,13 @@ export default class Level2Scene extends Phaser.Scene {
 			});
 		};
 	}
+
+    setupInput() {
+        // Utilise directement ControlsManager
+        const controls = ControlsManager.createKeys(this);
+        this.jumpKey = controls.jumpKey;
+        this.leftKey = controls.leftKey;
+        this.rightKey = controls.rightKey;
+        this.escapeKey = controls.escapeKey;
+    }	
 }
