@@ -1,4 +1,6 @@
 import { saveUserProgress, ControlsManager } from './main.js';
+import { PendulumObstacles } from './PendulumObstacles.js';
+import { MovingPlatforms } from './MovingPlatforms.js';
 
 /**
  * Level 1 Scene - Main gameplay scene with enhanced platformer mechanics
@@ -8,6 +10,8 @@ export default class Level1Scene extends Phaser.Scene {
     constructor() {
         super('Level1Scene');
         this.initializeProperties();
+        this.pendulumObstaclesManager = new PendulumObstacles(this);
+        this.movingPlatformsManager = new MovingPlatforms(this);
     }
 
     /**
@@ -60,7 +64,6 @@ export default class Level1Scene extends Phaser.Scene {
         // Interactive objects
         this.movingPlatforms = [];
         this.platformSprites = [];
-        this.pendulumObstacles = [];
         this.pushableObstacles = [];
         this.playerOnPlatform = false;
     }
@@ -287,8 +290,8 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     createInteractiveObjects() {
-        this.createMovingPlatforms();
-        this.createPendulumObstacles();
+        this.movingPlatformsManager.createMovingPlatforms();
+        this.pendulumObstaclesManager.createPendulumObstacles();
         this.createPushableObstacles();
     }
 
@@ -314,11 +317,10 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     updateInteractiveObjects() {
-        this.updateMovingPlatforms();
-        this.updatePendulumObstacles();
+        this.movingPlatformsManager.updateMovingPlatforms();
+        this.pendulumObstaclesManager.updatePendulumObstacles();
         this.updatePushableObstacles();
     }
-
     updatePlayerMovement() {
         // Update wall jump timers
         if (this.wallJumpCooldown > 0) {
@@ -364,364 +366,6 @@ export default class Level1Scene extends Phaser.Scene {
         }
         this.score = Math.floor(this.maxDistance) * 10;
         this.scoreText.setText('Score: ' + this.score);
-    }
-
-    // ===========================================
-    // MOVING PLATFORMS SYSTEM
-    // ===========================================
-
-    createMovingPlatforms() {
-        const platformConfigs = [
-            {
-                startTileX: 29, startTileY: 26, widthInTiles: 2, heightInTiles: 1,
-                speed: 50, direction: 'horizontal',
-                minTileX: 27, maxTileX: 38, minTileY: 14, maxTileY: 10,
-                tiles: [
-                    { tilesetName: 'tileset_spring', localId: 23 },
-                    { tilesetName: 'tileset_spring', localId: 24 }
-                ]
-            },
-            {
-                startTileX: 99, startTileY: 32, widthInTiles: 2, heightInTiles: 1,
-                speed: 40, direction: 'horizontal',
-                minTileX: 99, maxTileX: 109, minTileY: 12, maxTileY: 12,
-                tiles: [
-                    { tilesetName: 'tileset_spring', localId: 23 },
-                    { tilesetName: 'tileset_spring', localId: 24 }
-                ]
-            },
-            {
-                startTileX: 66, startTileY: 29, widthInTiles: 2, heightInTiles: 1,
-                speed: 30, direction: 'horizontal',
-                minTileX: 66, maxTileX: 75, minTileY: 29, maxTileY: 29,
-                tiles: [
-                    { tilesetName: 'tileset_spring', localId: 23 },
-                    { tilesetName: 'tileset_spring', localId: 24 }
-                ]
-            },
-            {
-                startTileX: 79, startTileY: 35, widthInTiles: 2, heightInTiles: 1,
-                speed: 40, direction: 'vertical',
-                minTileX: 79, maxTileX: 79, minTileY: 30, maxTileY: 35,
-                tiles: [
-                    { tilesetName: 'tileset_spring', localId: 23 },
-                    { tilesetName: 'tileset_spring', localId: 24 }
-                ]
-            },
-            {
-                startTileX: 13, startTileY: 25, widthInTiles: 1, heightInTiles: 7,
-                speed: 50, direction: 'vertical',
-                minTileX: 13, maxTileX: 13, minTileY: 25, maxTileY: 28,
-                tiles: Array(7).fill({ tilesetName: 'tileset_spring', localId: 23 })
-            }
-        ];
-
-        this.movingPlatforms = [];
-        this.platformSprites = [];
-        
-        platformConfigs.forEach((platformConfig, index) => {
-            this.createSingleMovingPlatform(platformConfig, index);
-        });
-
-        this.playerOnPlatform = false;
-    }
-
-    createSingleMovingPlatform(platformConfig, index) {
-        // Convert tile coordinates to pixel coordinates
-        const startX = platformConfig.startTileX * 16 + (platformConfig.widthInTiles * 16) / 2;
-        const startY = platformConfig.startTileY * 16 + (platformConfig.heightInTiles * 16) / 2;
-        const minX = platformConfig.minTileX * 16 + (platformConfig.widthInTiles * 16) / 2;
-        const maxX = platformConfig.maxTileX * 16 + (platformConfig.widthInTiles * 16) / 2;
-        const minY = platformConfig.minTileY * 16 + (platformConfig.heightInTiles * 16) / 2;
-        const maxY = platformConfig.maxTileY * 16 + (platformConfig.heightInTiles * 16) / 2;
-
-        // Create platform physics body
-        const movingPlatform = this.physics.add.sprite(startX, startY, null);
-        movingPlatform.setSize(platformConfig.widthInTiles * 16, platformConfig.heightInTiles * 16);
-        movingPlatform.body.setImmovable(true);
-        movingPlatform.body.setGravityY(-800);
-        movingPlatform.setVisible(false);
-
-        // Configure platform properties
-        Object.assign(movingPlatform, {
-            minX, maxX, minY, maxY,
-            movementDirection: platformConfig.direction,
-            speed: platformConfig.speed,
-            config: platformConfig,
-            direction: 1
-        });
-
-        // Create visual sprites
-        const platformSprites = this.createPlatformSprites(platformConfig, startX, startY);
-        
-        this.movingPlatforms.push(movingPlatform);
-        this.platformSprites.push(platformSprites);
-
-        // Setup collisions
-        this.physics.add.collider(this.player, movingPlatform, () => {
-            if (this.player.body.bottom <= movingPlatform.body.top + 5 && 
-                this.player.body.velocity.y >= 0) {
-                this.playerOnPlatform = index;
-            }
-        });
-    }
-
-    createPlatformSprites(config, startX, startY) {
-        const sprites = [];
-        for (let i = 0; i < config.widthInTiles; i++) {
-            const spriteX = startX - (config.widthInTiles * 16) / 2 + (i * 16) + 8;
-            const sprite = this.add.sprite(spriteX, startY, 'tileset_spring');
-            const localFrameId = config.tiles[i % config.tiles.length].localId - 1;
-            sprite.setFrame(localFrameId);
-            sprites.push(sprite);
-        }
-        return sprites;
-    }
-
-    updateMovingPlatforms() {
-        if (!this.movingPlatforms || this.movingPlatforms.length === 0) return;
-
-        this.movingPlatforms.forEach((platform, index) => {
-            const deltaMovement = this.calculatePlatformMovement(platform);
-            this.updatePlatformPosition(platform, deltaMovement);
-            this.updatePlatformSprites(platform, index, deltaMovement);
-            this.handlePlayerPlatformInteraction(platform, index, deltaMovement);
-        });
-    }
-
-    calculatePlatformMovement(platform) {
-        const deltaMovement = platform.direction * platform.speed * (1/60);
-        const movement = { deltaX: 0, deltaY: 0 };
-
-        if (platform.movementDirection === 'horizontal') {
-            const newX = platform.x + deltaMovement;
-            if (newX >= platform.maxX) {
-                platform.x = platform.maxX;
-                platform.direction = -1;
-            } else if (newX <= platform.minX) {
-                platform.x = platform.minX;
-                platform.direction = 1;
-            } else {
-                movement.deltaX = deltaMovement;
-                platform.x = newX;
-            }
-        } else if (platform.movementDirection === 'vertical') {
-            const newY = platform.y + deltaMovement;
-            if (newY >= platform.maxY) {
-                platform.y = platform.maxY;
-                platform.direction = -1;
-            } else if (newY <= platform.minY) {
-                platform.y = platform.minY;
-                platform.direction = 1;
-            } else {
-                movement.deltaY = deltaMovement;
-                platform.y = newY;
-            }
-        }
-
-        return movement;
-    }
-
-    updatePlatformPosition(platform, movement) {
-        // Platform position is updated in calculatePlatformMovement
-    }
-
-    updatePlatformSprites(platform, index, movement) {
-        const config = platform.config;
-        this.platformSprites[index].forEach((sprite, spriteIndex) => {
-            sprite.x = platform.x - (config.widthInTiles * 16) / 2 + (spriteIndex * 16) + 8;
-            sprite.y = platform.y;
-        });
-    }
-
-    handlePlayerPlatformInteraction(platform, platformIndex, movement) {
-        if (this.playerOnPlatform === platformIndex) {
-            // Check if player is still on platform
-            if (this.player.body.bottom > platform.body.top + 10 || 
-                this.player.x < platform.body.left - 5 || 
-                this.player.x > platform.body.right + 5) {
-                this.playerOnPlatform = false;
-            } else {
-                // Move player with platform
-                this.player.x += movement.deltaX;
-                this.player.y += movement.deltaY;
-            }
-        } else {
-            // Handle platform pushing player when beside it
-            this.handlePlatformPushing(platform, movement);
-        }
-    }
-
-    handlePlatformPushing(platform, movement) {
-        const platformBounds = platform.body;
-        const playerBounds = this.player.body;
-        
-        const verticalOverlap = playerBounds.bottom > platformBounds.top && 
-                               playerBounds.top < platformBounds.bottom;
-        
-        if (verticalOverlap && movement.deltaX !== 0) {
-            // Handle horizontal pushing
-            if (movement.deltaX > 0 && 
-                playerBounds.left >= platformBounds.right - 10 && 
-                playerBounds.left <= platformBounds.right + 10) {
-                this.player.x += movement.deltaX;
-            } else if (movement.deltaX < 0 && 
-                      playerBounds.right <= platformBounds.left + 10 && 
-                      playerBounds.right >= platformBounds.left - 10) {
-                this.player.x += movement.deltaX;
-            }
-        }
-        
-        if (movement.deltaY !== 0) {
-            const horizontalOverlap = playerBounds.right > platformBounds.left && 
-                                     playerBounds.left < platformBounds.right;
-            
-            if (horizontalOverlap) {
-                // Handle vertical pushing
-                if (movement.deltaY > 0 && 
-                    playerBounds.top >= platformBounds.bottom - 10 && 
-                    playerBounds.top <= platformBounds.bottom + 10) {
-                    this.player.y += movement.deltaY;
-                } else if (movement.deltaY < 0 && 
-                          playerBounds.bottom <= platformBounds.top + 10 && 
-                          playerBounds.bottom >= platformBounds.top - 10) {
-                    this.player.y += movement.deltaY;
-                }
-            }
-        }
-    }
-
-    // ===========================================
-    // PENDULUM OBSTACLES SYSTEM
-    // ===========================================
-
-    createPendulumObstacles() {
-        this.pendulumObstacles = [];
-        
-        const pendulumConfigs = [
-            {
-                x: 37 * 16 + 8, y: 25 * 16 + 8,
-                chainLength: 4, armLength: 80, speed: 0.02,
-                maxAngle: Math.PI / 3, startAngle: 0
-            },
-            {
-                x: 90 * 16 + 8, y: 24 * 16 + 8,
-                chainLength: 4, armLength: 100, speed: 0.015,
-                maxAngle: Math.PI / 2, startAngle: Math.PI / 6
-            },
-            {
-                x: 106 * 16 + 8, y: 26 * 16 + 8,
-                chainLength: 5, armLength: 100, speed: 0.015,
-                maxAngle: Math.PI / 4, startAngle: Math.PI / 6
-            }
-        ];
-
-        pendulumConfigs.forEach((config, index) => {
-            this.createSinglePendulum(config, index);
-        });
-    }
-
-    createSinglePendulum(config, index) {
-        const pendulum = {
-            anchorX: config.x,
-            anchorY: config.y,
-            armLength: config.armLength,
-            angle: config.startAngle,
-            speed: config.speed,
-            maxAngle: config.maxAngle,
-            direction: 1,
-            chainSprites: [],
-            ballSprite: null,
-            spikeSprites: [],
-            dangerZone: null
-        };
-
-        // Create visual components
-        this.createPendulumVisuals(pendulum, config);
-        
-        // Create danger zone for collision
-        pendulum.dangerZone = this.add.rectangle(0, 0, 20, 20, 0xff0000, 0);
-        this.physics.add.existing(pendulum.dangerZone, true);
-        this.dangerZones.add(pendulum.dangerZone);
-
-        this.pendulumObstacles.push(pendulum);
-        this.updatePendulumPosition(pendulum);
-    }
-
-    createPendulumVisuals(pendulum, config) {
-        // Create chain sprites
-        for (let i = 0; i < config.chainLength; i++) {
-            const chainSprite = this.add.sprite(0, 0, 'staticObjects_');
-            chainSprite.setFrame(74);
-            pendulum.chainSprites.push(chainSprite);
-        }
-
-        // Create ball sprite
-        pendulum.ballSprite = this.add.sprite(0, 0, 'staticObjects_');
-        pendulum.ballSprite.setFrame(26);
-
-        // Create spike sprites
-        const spikeConfigs = [
-            { frameId: 130, offsetX: -16, offsetY: 0 },
-            { frameId: 112, offsetX: 0, offsetY: 16 },
-            { frameId: 111, offsetX: 16, offsetY: 0 }
-        ];
-
-        spikeConfigs.forEach(spikeConfig => {
-            const spike = this.add.sprite(0, 0, 'staticObjects_');
-            spike.setFrame(spikeConfig.frameId);
-            spike.offsetX = spikeConfig.offsetX;
-            spike.offsetY = spikeConfig.offsetY;
-            pendulum.spikeSprites.push(spike);
-        });
-    }
-
-    updatePendulumObstacles() {
-        if (!this.pendulumObstacles) return;
-
-        this.pendulumObstacles.forEach(pendulum => {
-            // Update pendulum physics
-            pendulum.angle += pendulum.direction * pendulum.speed;
-
-            // Check swing limits and reverse direction
-            if (pendulum.angle >= pendulum.maxAngle) {
-                pendulum.angle = pendulum.maxAngle;
-                pendulum.direction = -1;
-            } else if (pendulum.angle <= -pendulum.maxAngle) {
-                pendulum.angle = -pendulum.maxAngle;
-                pendulum.direction = 1;
-            }
-
-            this.updatePendulumPosition(pendulum);
-        });
-    }
-
-    updatePendulumPosition(pendulum) {
-        // Calculate ball position based on pendulum physics
-        const ballX = pendulum.anchorX + Math.sin(pendulum.angle) * pendulum.armLength;
-        const ballY = pendulum.anchorY + Math.cos(pendulum.angle) * pendulum.armLength;
-
-        // Update chain positions
-        pendulum.chainSprites.forEach((chain, index) => {
-            const chainRatio = (index + 1) / pendulum.chainSprites.length;
-            const chainX = pendulum.anchorX + Math.sin(pendulum.angle) * pendulum.armLength * chainRatio * 0.8;
-            const chainY = pendulum.anchorY + Math.cos(pendulum.angle) * pendulum.armLength * chainRatio * 0.8;
-            
-            chain.setPosition(chainX, chainY);
-            chain.setRotation(pendulum.angle);
-        });
-
-        // Update ball position
-        pendulum.ballSprite.setPosition(ballX, ballY);
-
-        // Update spike positions
-        pendulum.spikeSprites.forEach(spike => {
-            spike.setPosition(ballX + spike.offsetX, ballY + spike.offsetY);
-        });
-
-        // Update danger zone
-        pendulum.dangerZone.setPosition(ballX, ballY);
-        pendulum.dangerZone.body.updateFromGameObject();
     }
 
     // ===========================================
@@ -967,7 +611,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.isJumping = true;
         this.playerOnPlatform = false;
         
-        this.addJumpEffect();
+        // this.addJumpEffect();
         this.playJumpSound();
     }
 
