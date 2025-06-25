@@ -49,7 +49,7 @@ export class PendulumObstacles {
         this.createPendulumVisuals(pendulum, config);
         
         // Create danger zone for collision
-        pendulum.dangerZone = this.scene.add.rectangle(0, 0, 32, 32, 0xff0000, 0);
+        pendulum.dangerZone = this.scene.add.rectangle(0, 0, 20, 20, 0xff0000, 0);
         this.scene.physics.add.existing(pendulum.dangerZone, true);
         this.scene.dangerZones.add(pendulum.dangerZone);
 
