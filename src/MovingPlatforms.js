@@ -17,39 +17,15 @@ export class MovingPlatforms {
                     { tilesetName: 'tileset_spring', localId: 24 }
                 ]
             },
-            {
-                startTileX: 99, startTileY: 32, widthInTiles: 2, heightInTiles: 1,
-                speed: 40, direction: 'horizontal',
-                minTileX: 99, maxTileX: 109, minTileY: 12, maxTileY: 12,
+                {
+                startTileX: 92, startTileY: 8, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'horizontal',
+                minTileX: 92, maxTileX: 107, minTileY: 8, maxTileY: 8,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
                     { tilesetName: 'tileset_spring', localId: 24 }
                 ]
             },
-            {
-                startTileX: 66, startTileY: 29, widthInTiles: 2, heightInTiles: 1,
-                speed: 30, direction: 'horizontal',
-                minTileX: 66, maxTileX: 75, minTileY: 29, maxTileY: 29,
-                tiles: [
-                    { tilesetName: 'tileset_spring', localId: 23 },
-                    { tilesetName: 'tileset_spring', localId: 24 }
-                ]
-            },
-            {
-                startTileX: 79, startTileY: 35, widthInTiles: 2, heightInTiles: 1,
-                speed: 40, direction: 'vertical',
-                minTileX: 79, maxTileX: 79, minTileY: 30, maxTileY: 35,
-                tiles: [
-                    { tilesetName: 'tileset_spring', localId: 23 },
-                    { tilesetName: 'tileset_spring', localId: 24 }
-                ]
-            },
-            {
-                startTileX: 13, startTileY: 25, widthInTiles: 1, heightInTiles: 1,
-                speed: 50, direction: 'vertical',
-                minTileX: 13, maxTileX: 13, minTileY: 25, maxTileY: 28,
-                tiles: Array(7).fill({ tilesetName: 'tileset_spring', localId: 23 })
-            }
         ];
 
         this.movingPlatforms = [];

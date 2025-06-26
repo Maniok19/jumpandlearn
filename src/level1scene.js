@@ -522,7 +522,7 @@ export default class Level1Scene extends Phaser.Scene {
         
         const pushableConfigs = [
             {
-                x: 9 * 16 + 8, y: 30 * 16 + 8,
+                x: 120 * 16 + 8, y: 30 * 16 + 8,
                 width: 16, height: 16, pushSpeed: 30,
                 spriteConfig: { tileset: 'tileset_world', frameId: 55 }
             }
