@@ -94,6 +94,8 @@ export default class Level1Scene extends Phaser.Scene {
         this.load.spritesheet('player', 'assets/personnage/personnage.png', { 
             frameWidth: 32, frameHeight: 32 
         });
+        this.load.spritesheet('bee', 'assets/personnage/Bee_1.png', {
+            frameWidth: 24, frameHeight: 24})
 
         this.load.audio('level1_music', 'assets/song/level1_music.mp3');
     }
@@ -103,6 +105,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.setupMap();
         this.setupPlayer();
         this.setupQuestionZones();
+        this.setupBee();
         this.setupAnimations();
         this.setupUI();
         this.setupCamera();
@@ -129,6 +132,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.updateInteractiveObjects();
         this.updatePlayerMovement();
         this.updateScore();
+        this.updateBee();
     }
 
     // ===========================================
@@ -248,6 +252,33 @@ export default class Level1Scene extends Phaser.Scene {
         });
     }
 
+    setupBee() {
+        // Create bee enemy at a specific position
+        this.bee = this.physics.add.sprite(15 * 16 + 8, 25 * 16 + 8, 'bee');
+        this.bee.setCollideWorldBounds(false);
+        
+        // Set bee physics properties
+        this.bee.setSize(12, 12); // Adjust hitbox size
+        this.bee.setOffset(6, 6);  // Center the hitbox
+        this.bee.setGravityY(-800);
+        
+        // Bee movement properties
+        this.bee.speed = 60;
+        this.bee.direction = 1; // 1 for right, -1 for left
+        this.bee.patrolDistance = 64; // Distance to patrol (4 tiles)
+        this.bee.startX = this.bee.x; // Store starting position
+        
+        // Set up collision with player
+        this.physics.add.overlap(this.player, this.bee, () => {
+            this.handleBeeCollision();
+        });
+        
+        // Set up collision with map (optional - if you want bee to bounce off walls)
+        this.physics.add.collider(this.bee, this.map.getLayer('colision').tilemapLayer, () => {
+            this.bee.direction *= -1; // Change direction when hitting wall
+        });
+    }
+
     setupAnimations() {
         this.anims.create({
             key: 'idle',
@@ -275,6 +306,14 @@ export default class Level1Scene extends Phaser.Scene {
             frames: this.anims.generateFrameNumbers('player', { start: 16, end: 20 }),
             frameRate: 10,
             repeat: 0
+        });
+        
+        // Bee animations
+        this.anims.create({
+            key: 'bee_fly',
+            frames: this.anims.generateFrameNumbers('bee', { start: 0, end: 9 }),
+            frameRate: 8,
+            repeat: -1
         });
     }
 
@@ -1176,4 +1215,36 @@ export default class Level1Scene extends Phaser.Scene {
         });
     }
 }
+
+// Add this method after your existing update methods
+
+updateBee() {
+    if (!this.bee) return;
+    
+    // Simple patrol behavior
+    this.bee.setVelocityX(this.bee.speed * this.bee.direction);
+    
+    // Check if bee has moved too far from starting position
+    const distanceFromStart = Math.abs(this.bee.x - this.bee.startX);
+    if (distanceFromStart >= this.bee.patrolDistance) {
+        this.bee.direction *= -1; // Change direction
+    }
+    
+    // Flip sprite based on direction
+    this.bee.setFlipX(this.bee.direction < 0);
+    
+    // Play flying animation
+    this.bee.anims.play('bee_fly', true);
+    
+    // Optional: Add floating motion
+    this.bee.y += Math.sin(this.time.now * 0.003) * 0.5;
+}
+
+// Also add the collision handler method
+handleBeeCollision() {
+    // Reset score and show game over
+    this.score = 0;
+    this.showGameOverUI();
+}
+
 }

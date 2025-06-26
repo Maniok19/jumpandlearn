@@ -45,7 +45,7 @@ export class MovingPlatforms {
                 ]
             },
             {
-                startTileX: 13, startTileY: 25, widthInTiles: 1, heightInTiles: 7,
+                startTileX: 13, startTileY: 25, widthInTiles: 1, heightInTiles: 1,
                 speed: 50, direction: 'vertical',
                 minTileX: 13, maxTileX: 13, minTileY: 25, maxTileY: 28,
                 tiles: Array(7).fill({ tilesetName: 'tileset_spring', localId: 23 })
