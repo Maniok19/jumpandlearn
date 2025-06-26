@@ -265,7 +265,7 @@ export default class Level1Scene extends Phaser.Scene {
         // Bee movement properties
         this.bee.speed = 60;
         this.bee.direction = 1; // 1 for right, -1 for left
-        this.bee.patrolDistance = 64; // Distance to patrol (4 tiles)
+        this.bee.patrolDistance = 12 * 16; // Distance to patrol (4 tiles)
         this.bee.startX = this.bee.x; // Store starting position
         
         // Set up collision with player
@@ -1228,6 +1228,12 @@ updateBee() {
     const distanceFromStart = Math.abs(this.bee.x - this.bee.startX);
     if (distanceFromStart >= this.bee.patrolDistance) {
         this.bee.direction *= -1; // Change direction
+        // Add a small buffer to prevent immediate direction change again
+        if (this.bee.direction > 0) {
+            this.bee.x = this.bee.startX - this.bee.patrolDistance + 5;
+        } else {
+            this.bee.x = this.bee.startX + this.bee.patrolDistance - 5;
+        }
     }
     
     // Flip sprite based on direction
