@@ -2,6 +2,7 @@ import { saveUserProgress, ControlsManager, InGameSettingsManager } from './main
 import { PendulumObstacles } from './PendulumObstacles.js';
 import { MovingPlatforms } from './MovingPlatforms.js';
 import Bee from './Bee.js';
+import Bomb from './Bomb.js';
 
 /**
  * Level 1 Scene - Main gameplay scene with enhanced platformer mechanics
@@ -14,8 +15,9 @@ export default class Level1Scene extends Phaser.Scene {
         this.pendulumObstaclesManager = new PendulumObstacles(this);
         this.movingPlatformsManager = new MovingPlatforms(this);
         
-        // Initialiser le tableau des abeilles
+        // Initialiser les tableaux des ennemis
         this.bees = [];
+        this.bombs = []; // Nouveau tableau pour les bombes
     }
 
     /**
@@ -101,6 +103,10 @@ export default class Level1Scene extends Phaser.Scene {
         this.load.spritesheet('bee', 'assets/personnage/Bee_1.png', {
             frameWidth: 24, frameHeight: 24})
 
+        this.load.spritesheet('bomb', 'assets/personnage/Bomb.png', {
+            frameWidth: 24, frameHeight: 24
+        });
+
         this.load.audio('level1_music', 'assets/song/level1_music.mp3');
     }
 
@@ -110,6 +116,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.setupPlayer();
         this.setupQuestionZones();
         this.setupBee();
+        this.setupBomb(); // Ajouter cette ligne
         this.setupAnimations();
         this.setupUI();
         this.setupCamera();
@@ -136,13 +143,21 @@ export default class Level1Scene extends Phaser.Scene {
         this.updateInteractiveObjects();
         this.updatePlayerMovement();
         this.updateScore();
-        this.updateBees(); // Nouvelle méthode simplifiée
+        this.updateBees();
+        this.updateBombs(); // Ajouter cette ligne
     }
 
     updateBees() {
         // Mettre à jour toutes les abeilles
         this.bees.forEach(bee => {
             bee.update();
+        });
+    }
+
+    updateBombs() {
+        // Mettre à jour toutes les bombes
+        this.bombs.forEach(bomb => {
+            bomb.update();
         });
     }
 
@@ -200,7 +215,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupPlayer() {
-        this.player = this.physics.add.sprite(50 * 16 + 8, 30 * 16 + 8, 'player');
+        this.player = this.physics.add.sprite(6 * 16 + 8, 30 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
         
         // Hitbox de base
@@ -293,6 +308,26 @@ export default class Level1Scene extends Phaser.Scene {
         });
     }
 
+    setupBomb() {
+        // Créer une ou plusieurs bombes avec différentes configurations
+        const bombConfigs = [
+            {
+                x: 48 * 16 + 8,
+                y: 30 * 16 + 5,
+                config: {
+                    speed: 20,
+                    patrolDistance: 6 * 16
+                }
+            }
+            // Tu peux ajouter d'autres bombes ici
+        ];
+
+        bombConfigs.forEach(bombConfig => {
+            const bomb = new Bomb(this, bombConfig.x, bombConfig.y, bombConfig.config);
+            this.bombs.push(bomb);
+        });
+    }
+
     setupAnimations() {
         this.anims.create({
             key: 'idle',
@@ -326,6 +361,13 @@ export default class Level1Scene extends Phaser.Scene {
         this.anims.create({
             key: 'bee_fly',
             frames: this.anims.generateFrameNumbers('bee', { start: 0, end: 9 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'bomb_walk',
+            frames: this.anims.generateFrameNumbers('bomb', { start: 0, end: 4 }),
             frameRate: 8,
             repeat: -1
         });
@@ -1234,6 +1276,12 @@ export default class Level1Scene extends Phaser.Scene {
 // Add this method after your existing update methods
 
 handleBeeCollision() {
+    // Reset score and show game over
+    this.score = 0;
+    this.showGameOverUI();
+}
+
+handleBombCollision() {
     // Reset score and show game over
     this.score = 0;
     this.showGameOverUI();
