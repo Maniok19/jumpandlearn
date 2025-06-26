@@ -1,6 +1,7 @@
 import { saveUserProgress, ControlsManager, InGameSettingsManager } from './main.js';
 import { PendulumObstacles } from './PendulumObstacles.js';
 import { MovingPlatforms } from './MovingPlatforms.js';
+import Bee from './Bee.js';
 
 /**
  * Level 1 Scene - Main gameplay scene with enhanced platformer mechanics
@@ -12,6 +13,9 @@ export default class Level1Scene extends Phaser.Scene {
         this.initializeProperties();
         this.pendulumObstaclesManager = new PendulumObstacles(this);
         this.movingPlatformsManager = new MovingPlatforms(this);
+        
+        // Initialiser le tableau des abeilles
+        this.bees = [];
     }
 
     /**
@@ -132,7 +136,14 @@ export default class Level1Scene extends Phaser.Scene {
         this.updateInteractiveObjects();
         this.updatePlayerMovement();
         this.updateScore();
-        this.updateBee();
+        this.updateBees(); // Nouvelle méthode simplifiée
+    }
+
+    updateBees() {
+        // Mettre à jour toutes les abeilles
+        this.bees.forEach(bee => {
+            bee.update();
+        });
     }
 
     // ===========================================
@@ -253,29 +264,32 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupBee() {
-        // Create bee enemy at a specific position
-        this.bee = this.physics.add.sprite(15 * 16 + 8, 25 * 16 + 8, 'bee');
-        this.bee.setCollideWorldBounds(false);
-        
-        // Set bee physics properties
-        this.bee.setSize(12, 12); // Adjust hitbox size
-        this.bee.setOffset(6, 6);  // Center the hitbox
-        this.bee.setGravityY(-800);
-        
-        // Bee movement properties
-        this.bee.speed = 60;
-        this.bee.direction = 1; // 1 for right, -1 for left
-        this.bee.patrolDistance = 12 * 16; // Distance to patrol (4 tiles)
-        this.bee.startX = this.bee.x; // Store starting position
-        
-        // Set up collision with player
-        this.physics.add.overlap(this.player, this.bee, () => {
-            this.handleBeeCollision();
-        });
-        
-        // Set up collision with map (optional - if you want bee to bounce off walls)
-        this.physics.add.collider(this.bee, this.map.getLayer('colision').tilemapLayer, () => {
-            this.bee.direction *= -1; // Change direction when hitting wall
+        // Créer une ou plusieurs abeilles avec différentes configurations
+        const beeConfigs = [
+            {
+                x: 15 * 16 + 8,
+                y: 25 * 16 + 8,
+                config: {
+                    speed: 60,
+                    patrolDistance: 12 * 16,
+                    floatingAmplitude: 0.5
+                }
+            }
+            // Vous pouvez ajouter d'autres abeilles ici
+            // {
+            //     x: 30 * 16 + 8,
+            //     y: 20 * 16 + 8,
+            //     config: {
+            //         speed: 40,
+            //         patrolDistance: 8 * 16,
+            //         floatingAmplitude: 1.0
+            //     }
+            // }
+        ];
+
+        beeConfigs.forEach(beeConfig => {
+            const bee = new Bee(this, beeConfig.x, beeConfig.y, beeConfig.config);
+            this.bees.push(bee);
         });
     }
 
@@ -1218,35 +1232,6 @@ export default class Level1Scene extends Phaser.Scene {
 
 // Add this method after your existing update methods
 
-updateBee() {
-    if (!this.bee) return;
-    
-    // Simple patrol behavior
-    this.bee.setVelocityX(this.bee.speed * this.bee.direction);
-    
-    // Check if bee has moved too far from starting position
-    const distanceFromStart = Math.abs(this.bee.x - this.bee.startX);
-    if (distanceFromStart >= this.bee.patrolDistance) {
-        this.bee.direction *= -1; // Change direction
-        // Add a small buffer to prevent immediate direction change again
-        if (this.bee.direction > 0) {
-            this.bee.x = this.bee.startX - this.bee.patrolDistance + 5;
-        } else {
-            this.bee.x = this.bee.startX + this.bee.patrolDistance - 5;
-        }
-    }
-    
-    // Flip sprite based on direction
-    this.bee.setFlipX(this.bee.direction < 0);
-    
-    // Play flying animation
-    this.bee.anims.play('bee_fly', true);
-    
-    // Optional: Add floating motion
-    this.bee.y += Math.sin(this.time.now * 0.003) * 0.5;
-}
-
-// Also add the collision handler method
 handleBeeCollision() {
     // Reset score and show game over
     this.score = 0;
