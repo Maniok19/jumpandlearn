@@ -215,7 +215,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupPlayer() {
-        this.player = this.physics.add.sprite(6 * 16 + 8, 30 * 16 + 8, 'player');
+        this.player = this.physics.add.sprite(215 * 16 + 8, 21 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
         
         // Hitbox de base
@@ -525,6 +525,16 @@ export default class Level1Scene extends Phaser.Scene {
                 x: 120 * 16 + 8, y: 30 * 16 + 8,
                 width: 16, height: 16, pushSpeed: 30,
                 spriteConfig: { tileset: 'tileset_world', frameId: 55 }
+            },
+            {
+                x: 218 * 16 + 8, y: 21 * 16 + 8,
+                width: 16, height: 16, pushSpeed: 30,
+                spriteConfig: { tileset: 'tileset_world', frameId: 55 }
+            },
+            {
+                x: 220 * 16 + 8, y: 21 * 16 + 8,
+                width: 16, height: 16, pushSpeed: 30,
+                spriteConfig: { tileset: 'tileset_world', frameId: 55 }
             }
         ];
 
@@ -581,9 +591,9 @@ export default class Level1Scene extends Phaser.Scene {
         }
         
         // Overlap with danger zones
-        this.physics.add.overlap(obstacle, this.dangerZones, (obstacle, danger) => {
-            this.resetPushableObstacle(obstacle);
-        });
+        // this.physics.add.overlap(obstacle, this.dangerZones, (obstacle, danger) => {
+        //    this.resetPushableObstacle(obstacle);
+        // });
     }
 
     updatePushableObstacles() {

@@ -9,9 +9,9 @@ export class MovingPlatforms {
     createMovingPlatforms() {
         const platformConfigs = [
             {
-                startTileX: 33, startTileY: 25, widthInTiles: 2, heightInTiles: 1,
+                startTileX: 49, startTileY: 25, widthInTiles: 2, heightInTiles: 1,
                 speed: 50, direction: 'horizontal',
-                minTileX: 33, maxTileX: 51, minTileY: 25, maxTileY: 10,
+                minTileX: 33, maxTileX: 50, minTileY: 25, maxTileY: 10,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
                     { tilesetName: 'tileset_spring', localId: 24 }
@@ -21,6 +21,96 @@ export class MovingPlatforms {
                 startTileX: 92, startTileY: 8, widthInTiles: 2, heightInTiles: 1,
                 speed: 50, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 8, maxTileY: 8,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 92, startTileY: 12, widthInTiles: 2, heightInTiles: 1,
+                speed: 100, direction: 'horizontal',
+                minTileX: 92, maxTileX: 107, minTileY: 12, maxTileY: 12,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 92, startTileY: 16, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'horizontal',
+                minTileX: 92, maxTileX: 107, minTileY: 16, maxTileY: 16,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 92, startTileY: 20, widthInTiles: 2, heightInTiles: 1,
+                speed: 100, direction: 'horizontal',
+                minTileX: 92, maxTileX: 107, minTileY: 20, maxTileY: 20,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 92, startTileY: 24, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'horizontal',
+                minTileX: 92, maxTileX: 107, minTileY: 24, maxTileY: 24,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 92, startTileY: 27, widthInTiles: 2, heightInTiles: 1,
+                speed: 100, direction: 'horizontal',
+                minTileX: 92, maxTileX: 107, minTileY: 24, maxTileY: 24,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 92, startTileY: 30, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'horizontal',
+                minTileX: 92, maxTileX: 109, minTileY: 31, maxTileY: 31,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 155, startTileY: 32, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'vertical',
+                minTileX: 155, maxTileX: 155, minTileY: 23, maxTileY: 32,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 159, startTileY: 20, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'vertical',
+                minTileX: 159, maxTileX: 159, minTileY: 20, maxTileY: 29,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 163, startTileY: 26, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'vertical',
+                minTileX: 163, maxTileX: 163, minTileY: 17, maxTileY: 26,
+                tiles: [
+                    { tilesetName: 'tileset_spring', localId: 23 },
+                    { tilesetName: 'tileset_spring', localId: 24 }
+                ]
+            },
+                {
+                startTileX: 167, startTileY: 14, widthInTiles: 2, heightInTiles: 1,
+                speed: 50, direction: 'vertical',
+                minTileX: 167, maxTileX: 167, minTileY: 14, maxTileY: 23,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
                     { tilesetName: 'tileset_spring', localId: 24 }

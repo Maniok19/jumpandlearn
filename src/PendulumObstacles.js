@@ -9,14 +9,9 @@ export class PendulumObstacles {
         
         const pendulumConfigs = [
             {
-                x: 37 * 16 + 8, y: 25 * 16 + 8,
+                x: 42 * 16 + 8, y: 20 * 16 + 8,
                 chainLength: 4, armLength: 80, speed: 0.02,
                 maxAngle: Math.PI / 3, startAngle: 0
-            },
-            {
-                x: 94 * 16 + 8, y: 24 * 16 + 8,
-                chainLength: 4, armLength: 100, speed: 0.015,
-                maxAngle: Math.PI / 2, startAngle: Math.PI / 6
             },
             {
                 x: 106 * 16 + 8, y: 26 * 16 + 8,
