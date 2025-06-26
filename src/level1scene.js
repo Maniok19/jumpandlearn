@@ -200,7 +200,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupPlayer() {
-        this.player = this.physics.add.sprite(6 * 16 + 8, 30 * 16 + 8, 'player');
+        this.player = this.physics.add.sprite(50 * 16 + 8, 30 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
         
         // Hitbox de base
@@ -1043,7 +1043,8 @@ export default class Level1Scene extends Phaser.Scene {
                     if (typeof onCorrect === 'function') {
                         onCorrect();
                     }
-                    alert('Correct answer!');
+                    //alert('Correct answer!');
+                    this.input.keyboard.resetKeys();
                 } else {
                     this.showGameOverUI();
                 }
