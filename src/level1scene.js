@@ -312,44 +312,8 @@ export default class Level1Scene extends Phaser.Scene {
                 }
             },
             {
-                x: 99 * 16 + 8,
-                y: 19 * 16 + 8,
-                config: {
-                    speed: 60,
-                    patrolDistance: 6 * 16,
-                    floatingAmplitude: 0.2
-                }
-            },
-            {
-                x: 99 * 16 + 8,
-                y: 22 * 16 + 8,
-                config: {
-                    speed: 30,
-                    patrolDistance: 6 * 16,
-                    floatingAmplitude: 0.2
-                }
-            },
-            {
-                x: 99 * 16 + 8,
-                y: 28 * 16 + 8,
-                config: {
-                    speed: 90,
-                    patrolDistance: 6 * 16,
-                    floatingAmplitude: 0.2
-                }
-            },
-            {
                 x: 26 * 16 + 8,
-                y: 23 * 16 + 8,
-                config: {
-                    speed: 60,
-                    patrolDistance: 6 * 16,
-                    floatingAmplitude: 0.2
-                }
-            },
-            {
-                x: 162 * 16 + 8,
-                y: 28 * 16 + 8,
+                y: 22 * 16 + 8,
                 config: {
                     speed: 60,
                     patrolDistance: 6 * 16,
@@ -360,16 +324,7 @@ export default class Level1Scene extends Phaser.Scene {
                 x: 162 * 16 + 8,
                 y: 24 * 16 + 8,
                 config: {
-                    speed: 90,
-                    patrolDistance: 6 * 16,
-                    floatingAmplitude: 0.2
-                }
-            },
-            {
-                x: 162 * 16 + 8,
-                y: 20 * 16 + 8,
-                config: {
-                    speed: 90,
+                    speed: 60,
                     patrolDistance: 6 * 16,
                     floatingAmplitude: 0.2
                 }
@@ -398,15 +353,15 @@ export default class Level1Scene extends Phaser.Scene {
                 x: 15 * 16 + 8,
                 y: 26 * 16 + 5,
                 config: {
-                    speed: 70,
+                    speed: 50,
                     patrolDistance: 4 * 16
                 }
             },
             {
-                x: 152 * 16 + 8,
+                x: 151 * 16 + 8,
                 y: 30 * 16 + 5,
                 config: {
-                    speed: 70,
+                    speed: 50,
                     patrolDistance: 2 * 16
                 }
             },
@@ -414,7 +369,7 @@ export default class Level1Scene extends Phaser.Scene {
                 x: 143 * 16 + 8,
                 y: 30 * 16 + 5,
                 config: {
-                    speed: 70,
+                    speed: 50,
                     patrolDistance: 4 * 16
                 }
             },
@@ -422,7 +377,7 @@ export default class Level1Scene extends Phaser.Scene {
                 x: 135 * 16 + 8,
                 y: 30 * 16 + 5,
                 config: {
-                    speed: 70,
+                    speed: 50,
                     patrolDistance: 5 * 16
                 }
             },
@@ -430,7 +385,7 @@ export default class Level1Scene extends Phaser.Scene {
                 x: 125 * 16 + 8,
                 y: 30 * 16 + 5,
                 config: {
-                    speed: 70,
+                    speed: 50,
                     patrolDistance: 5 * 16
                 }
             },

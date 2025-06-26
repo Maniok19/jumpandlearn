@@ -6,10 +6,10 @@ export default class Bee {
         this.config = {
             speed: 60,
             patrolDistance: 12 * 16, // 12 tiles
-            hitboxWidth: 12,
-            hitboxHeight: 12,
-            hitboxOffsetX: 6,
-            hitboxOffsetY: 6,
+            hitboxWidth: 8,
+            hitboxHeight: 8,
+            hitboxOffsetX: 8,
+            hitboxOffsetY: 8,
             floatingAmplitude: 0.5,
             floatingSpeed: 0.003,
             ...config
@@ -17,6 +17,8 @@ export default class Bee {
         
         // Créer le sprite
         this.sprite = scene.physics.add.sprite(x, y, 'bee');
+        // Phase unique pour chaque abeille, basée sur sa position
+        this.floatingPhase = (x * 13.37 + y * 42.42) % (2 * Math.PI);
         this.setupPhysics();
         this.setupMovement(x);
         this.setupAnimations();
@@ -101,8 +103,9 @@ export default class Bee {
     }
     
     updateFloatingMotion() {
-        // Mouvement de flottement optionnel
-        this.sprite.y += Math.sin(this.scene.time.now * this.config.floatingSpeed) * this.config.floatingAmplitude;
+        // Mouvement de flottement déterministe
+        const t = this.scene.time.now * this.config.floatingSpeed + this.floatingPhase;
+        this.sprite.y += Math.sin(t) * this.config.floatingAmplitude;
     }
     
     handlePlayerCollision() {

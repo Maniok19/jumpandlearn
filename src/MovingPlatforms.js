@@ -19,7 +19,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 8, widthInTiles: 2, heightInTiles: 1,
-                speed: 50, direction: 'horizontal',
+                speed: 40, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 8, maxTileY: 8,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
@@ -28,7 +28,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 12, widthInTiles: 2, heightInTiles: 1,
-                speed: 100, direction: 'horizontal',
+                speed: 80, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 12, maxTileY: 12,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
@@ -37,7 +37,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 16, widthInTiles: 2, heightInTiles: 1,
-                speed: 50, direction: 'horizontal',
+                speed: 40, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 16, maxTileY: 16,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
@@ -46,7 +46,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 20, widthInTiles: 2, heightInTiles: 1,
-                speed: 100, direction: 'horizontal',
+                speed: 80, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 20, maxTileY: 20,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
@@ -55,7 +55,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 24, widthInTiles: 2, heightInTiles: 1,
-                speed: 50, direction: 'horizontal',
+                speed: 40, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 24, maxTileY: 24,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
@@ -64,7 +64,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 27, widthInTiles: 2, heightInTiles: 1,
-                speed: 100, direction: 'horizontal',
+                speed: 80, direction: 'horizontal',
                 minTileX: 92, maxTileX: 107, minTileY: 24, maxTileY: 24,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
@@ -73,7 +73,7 @@ export class MovingPlatforms {
             },
                 {
                 startTileX: 92, startTileY: 30, widthInTiles: 2, heightInTiles: 1,
-                speed: 50, direction: 'horizontal',
+                speed: 40, direction: 'horizontal',
                 minTileX: 92, maxTileX: 109, minTileY: 31, maxTileY: 31,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
