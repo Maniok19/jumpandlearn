@@ -9,9 +9,9 @@ export class MovingPlatforms {
     createMovingPlatforms() {
         const platformConfigs = [
             {
-                startTileX: 29, startTileY: 26, widthInTiles: 2, heightInTiles: 1,
+                startTileX: 33, startTileY: 25, widthInTiles: 2, heightInTiles: 1,
                 speed: 50, direction: 'horizontal',
-                minTileX: 27, maxTileX: 38, minTileY: 14, maxTileY: 10,
+                minTileX: 33, maxTileX: 51, minTileY: 25, maxTileY: 10,
                 tiles: [
                     { tilesetName: 'tileset_spring', localId: 23 },
                     { tilesetName: 'tileset_spring', localId: 24 }

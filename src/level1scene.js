@@ -194,7 +194,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.setupDangerZones();
         
         // Setup end zone
-        this.endZone = this.add.rectangle(17 * 16 + 8, 27 * 16 + 8, 50, 50);
+        this.endZone = this.add.rectangle(282 * 16 + 8, 12 * 16 + 8, 50, 50);
         this.physics.add.existing(this.endZone, true);
     }
 
