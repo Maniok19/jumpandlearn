@@ -215,7 +215,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupPlayer() {
-        this.player = this.physics.add.sprite(215 * 16 + 8, 21 * 16 + 8, 'player');
+        this.player = this.physics.add.sprite(1 * 16 + 8, 30 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
         
         // Hitbox de base
@@ -240,19 +240,30 @@ export default class Level1Scene extends Phaser.Scene {
     setupQuestionZones() {
         this.questionZonesData = [
             { 
-                x: 55 * 16 + 8, y: 503, width: 1 * 16, height: 1 * 16, 
+                x: 80 * 16 + 8, y: 7 * 16 + 7, width: 1 * 16, height: 1 * 16, 
                 questionId: "1b86380f-b7f8-4eba-a415-5bb3339403fa",
                 bridge: { 
-                    startX: 57, endX: 62, y: 31, 
-                    tileId: 10, tileset: 'tileset_world'
+                    startX: 82, endX: 89, y: 7, 
+                    tileId: 10, tileset: 'tileset_world',
+                    hasCollision: true
                 }
             },
             { 
-                x: 85 * 16 + 8, y: 503, width: 1 * 16, height: 1 * 16, 
+                x: 204 * 16 + 8, y: 22 * 16 + 7, width: 1 * 16, height: 1 * 16, 
                 questionId: "434dd4c6-9ccd-41c4-9c61-627cc6d87c04",
                 bridge: { 
-                    startX: 87, endX: 92, y: 31, 
-                    tileId: 10, tileset: 'tileset_world'
+                    startX: 209, endX: 210, y: 22, 
+                    tileId: 123, tileset: 'tileset_spring',
+                    hasCollision: true
+                }
+            },
+            { 
+                x: 268 * 16 + 8, y: 7 * 16 + 7, width: 1 * 16, height: 1 * 16, 
+                questionId: "18ed9d74-84ef-4b10-a35b-7cd71617b79f",
+                bridge: { 
+                    startX: 269, endX: 276, y: 6, 
+                    tileId: 59, tileset: 'tileset_world',
+                    hasCollision: false  // Pas de collision pour le bloc invisible
                 }
             }
         ];
@@ -282,24 +293,96 @@ export default class Level1Scene extends Phaser.Scene {
         // Créer une ou plusieurs abeilles avec différentes configurations
         const beeConfigs = [
             {
-                x: 15 * 16 + 8,
-                y: 25 * 16 + 8,
+                x: 99 * 16 + 8,
+                y: 10 * 16 + 8,
+                config: {
+                    speed: 30,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            
+            },
+            {
+                x: 99 * 16 + 8,
+                y: 14 * 16 + 8,
+                config: {
+                    speed: 90,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 99 * 16 + 8,
+                y: 19 * 16 + 8,
                 config: {
                     speed: 60,
-                    patrolDistance: 12 * 16,
-                    floatingAmplitude: 0.5
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
                 }
-            }
-            // Vous pouvez ajouter d'autres abeilles ici
-            // {
-            //     x: 30 * 16 + 8,
-            //     y: 20 * 16 + 8,
-            //     config: {
-            //         speed: 40,
-            //         patrolDistance: 8 * 16,
-            //         floatingAmplitude: 1.0
-            //     }
-            // }
+            },
+            {
+                x: 99 * 16 + 8,
+                y: 22 * 16 + 8,
+                config: {
+                    speed: 30,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 99 * 16 + 8,
+                y: 28 * 16 + 8,
+                config: {
+                    speed: 90,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 26 * 16 + 8,
+                y: 23 * 16 + 8,
+                config: {
+                    speed: 60,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 162 * 16 + 8,
+                y: 28 * 16 + 8,
+                config: {
+                    speed: 60,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 162 * 16 + 8,
+                y: 24 * 16 + 8,
+                config: {
+                    speed: 90,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 162 * 16 + 8,
+                y: 20 * 16 + 8,
+                config: {
+                    speed: 90,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
+            {
+                x: 162 * 16 + 8,
+                y: 16 * 16 + 8,
+                config: {
+                    speed: 60,
+                    patrolDistance: 6 * 16,
+                    floatingAmplitude: 0.2
+                }
+            },
         ];
 
         beeConfigs.forEach(beeConfig => {
@@ -312,13 +395,45 @@ export default class Level1Scene extends Phaser.Scene {
         // Créer une ou plusieurs bombes avec différentes configurations
         const bombConfigs = [
             {
-                x: 48 * 16 + 8,
+                x: 15 * 16 + 8,
+                y: 26 * 16 + 5,
+                config: {
+                    speed: 70,
+                    patrolDistance: 4 * 16
+                }
+            },
+            {
+                x: 152 * 16 + 8,
                 y: 30 * 16 + 5,
                 config: {
-                    speed: 20,
-                    patrolDistance: 6 * 16
+                    speed: 70,
+                    patrolDistance: 2 * 16
                 }
-            }
+            },
+            {
+                x: 143 * 16 + 8,
+                y: 30 * 16 + 5,
+                config: {
+                    speed: 70,
+                    patrolDistance: 4 * 16
+                }
+            },
+            {
+                x: 135 * 16 + 8,
+                y: 30 * 16 + 5,
+                config: {
+                    speed: 70,
+                    patrolDistance: 5 * 16
+                }
+            },
+            {
+                x: 125 * 16 + 8,
+                y: 30 * 16 + 5,
+                config: {
+                    speed: 70,
+                    patrolDistance: 5 * 16
+                }
+            },
             // Tu peux ajouter d'autres bombes ici
         ];
 
@@ -1048,7 +1163,7 @@ export default class Level1Scene extends Phaser.Scene {
             console.error(`Tileset ${tilesetName} not found`);
             return null;
         }
-        return tileset.firstgid + localTileId - 1;
+        return tileset.firstgid + localTileId;
     }
 
     stopTimer() {
@@ -1198,7 +1313,9 @@ export default class Level1Scene extends Phaser.Scene {
                     if (globalTileId !== null) {
                         const tile = collisionLayer.putTileAt(globalTileId, x, bridge.y);
                         if (tile) {
-                            tile.setCollision(true);
+                            // Utiliser la propriété hasCollision pour déterminer les collisions
+                            tile.setCollision(bridge.hasCollision !== false);
+                            
                             this.addBridgeTileEffect(tile);
                             
                             const tilePixelX = x * 16;
