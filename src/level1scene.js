@@ -1026,8 +1026,10 @@ export default class Level1Scene extends Phaser.Scene {
     // ===========================================
     
     playJumpSound() {
-        // Create a jump sound using Web Audio API
         try {
+            const savedVolume = localStorage.getItem('sfxVolume') || '50';
+            const volumeValue = parseFloat(savedVolume) / 100;
+
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -1038,8 +1040,8 @@ export default class Level1Scene extends Phaser.Scene {
             oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
             
-            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            gainNode.gain.setValueAtTime(0.2 * volumeValue, audioContext.currentTime); // Appliquer le volume
+            gainNode.gain.exponentialRampToValueAtTime(0.01 * volumeValue, audioContext.currentTime + 0.15);
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.15);
@@ -1050,6 +1052,9 @@ export default class Level1Scene extends Phaser.Scene {
     
     playDoubleJumpSound() {
         try {
+            const savedVolume = localStorage.getItem('sfxVolume') || '50';
+            const volumeValue = parseFloat(savedVolume) / 100;
+
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -1061,8 +1066,8 @@ export default class Level1Scene extends Phaser.Scene {
             oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.08);
             oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.12);
             
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.15 * volumeValue, audioContext.currentTime); // Appliquer le volume
+            gainNode.gain.exponentialRampToValueAtTime(0.01 * volumeValue, audioContext.currentTime + 0.2);
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.2);
@@ -1073,6 +1078,9 @@ export default class Level1Scene extends Phaser.Scene {
 
     playWallJumpSound() {
         try {
+            const savedVolume = localStorage.getItem('sfxVolume') || '50';
+            const volumeValue = parseFloat(savedVolume) / 100;
+
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -1082,8 +1090,8 @@ export default class Level1Scene extends Phaser.Scene {
 
             oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1 * volumeValue, audioContext.currentTime); // Appliquer le volume
+            gainNode.gain.exponentialRampToValueAtTime(0.01 * volumeValue, audioContext.currentTime + 0.1);
 
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.1);
@@ -1094,6 +1102,9 @@ export default class Level1Scene extends Phaser.Scene {
 
     playPushSound() {
         try {
+            const savedVolume = localStorage.getItem('sfxVolume') || '50';
+            const volumeValue = parseFloat(savedVolume) / 100;
+
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -1103,8 +1114,8 @@ export default class Level1Scene extends Phaser.Scene {
 
             oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.05);
-            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+            gainNode.gain.setValueAtTime(0.05 * volumeValue, audioContext.currentTime); // Appliquer le volume
+            gainNode.gain.exponentialRampToValueAtTime(0.01 * volumeValue, audioContext.currentTime + 0.05);
 
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.05);
@@ -1115,6 +1126,10 @@ export default class Level1Scene extends Phaser.Scene {
 
     playGameOverSound() {
         try {
+            // Récupérer le volume sauvegardé (entre 0 et 100)
+            const savedVolume = localStorage.getItem('sfxVolume') || '15';
+            const volumeValue = parseFloat(savedVolume) / 100; // Convertir en 0.0-1.0
+
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -1126,8 +1141,8 @@ export default class Level1Scene extends Phaser.Scene {
             oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.5);
 
-            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            gainNode.gain.setValueAtTime(0.2 * volumeValue, audioContext.currentTime); // Appliquer le volume
+            gainNode.gain.exponentialRampToValueAtTime(0.01 * volumeValue, audioContext.currentTime + 0.5);
 
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
@@ -1138,6 +1153,10 @@ export default class Level1Scene extends Phaser.Scene {
 
     playVictorySound() {
         try {
+            // Récupérer le volume sauvegardé
+            const savedVolume = localStorage.getItem('sfxVolume') || '50';
+            const volumeValue = parseFloat(savedVolume) / 100;
+
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -1150,8 +1169,8 @@ export default class Level1Scene extends Phaser.Scene {
             oscillator.frequency.linearRampToValueAtTime(660, audioContext.currentTime + 0.15);
             oscillator.frequency.linearRampToValueAtTime(880, audioContext.currentTime + 0.3);
 
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+            gainNode.gain.setValueAtTime(0.15 * volumeValue, audioContext.currentTime); // Appliquer le volume
+            gainNode.gain.exponentialRampToValueAtTime(0.01 * volumeValue, audioContext.currentTime + 0.35);
 
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.35);
