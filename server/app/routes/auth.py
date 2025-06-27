@@ -15,6 +15,7 @@ login_model = api.model('Login', {
 
 register_model = api.model('Register', {
     'email': fields.String(required=True, description='User email'),
+    'username': fields.String(required=True, description='Username'), # Nouveau champ
     'password': fields.String(required=True, description='User password')
 })
 
@@ -26,14 +27,25 @@ class Register(Resource):
     def post(self):
         """Register a new user"""
         data = api.payload
-        # Vérifie si l'utilisateur existe déjà
+        
+        # Vérifier si l'email existe déjà
         if facade.get_user_by_email(data['email']):
             return {'error': 'Email already registered'}, 400
+            
+        # Vérifier si le nom d'utilisateur existe déjà
+        if facade.get_user_by_username(data['username']):
+            return {'error': 'Username already taken'}, 400
+            
         try:
-            user = facade.create_user({'email': data['email'], 'password': data['password']})
+            user = facade.create_user({
+                'email': data['email'], 
+                'username': data['username'],
+                'password': data['password']
+            })
         except ValueError as e:
             return {'error': str(e)}, 400
         return {'message': 'User registered successfully'}, 201
+
 #----------------------------------------------login endpoint------------------------------------------------
 
 @api.route('/login')
@@ -57,4 +69,3 @@ class Login(Resource):
         
         # Step 4: Return the JWT token to the client
         return {'access_token': access_token}, 200
-    

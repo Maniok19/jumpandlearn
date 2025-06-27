@@ -102,7 +102,7 @@ class Leaderboard(Resource):
         for progress in progress_records:
             user = facade.get_user(progress.user_id)
             leaderboard.append({
-                'user_email': user.email if user else 'Unknown',
+                'username': user.username if user else 'Unknown', # Changé de user_email à username
                 'level': progress.level,
                 'completion_time': progress.completion_time
             })

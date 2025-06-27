@@ -10,6 +10,7 @@ class User(BaseModel):
     """Model class representing a user"""
     __tablename__ = 'users'
     _email = db.Column(db.String(120), nullable=False, unique=True)
+    _username = db.Column(db.String(15), nullable=False, unique=True)  # Nouvelle colonne
     _password = db.Column(db.String(128), nullable=False)
     progress = db.relationship('Progress', back_populates='user', uselist=False)
 
@@ -41,6 +42,30 @@ class User(BaseModel):
         if not re.match(pattern, value):
             raise ValueError("Invalid email address")
         self._email = value
+
+#-----------------------------------username.getter-----------------------------------
+    
+    @hybrid_property
+    def username(self):
+        """Get the username of the user"""
+        return self._username
+
+#-----------------------------------username.setter-----------------------------------
+    
+    @username.setter
+    def username(self, value):
+        """Set the username of the user"""
+        if not value:
+            raise ValueError("Username cannot be empty")
+        if len(value) < 3:
+            raise ValueError("Username must be at least 3 characters long")
+        if len(value) > 15:
+            raise ValueError("Username cannot be longer than 15 characters")
+        # Vérifier que le nom d'utilisateur ne contient que des caractères autorisés
+        pattern = r'^[a-zA-Z0-9_-]+$'
+        if not re.match(pattern, value):
+            raise ValueError("Username can only contain letters, numbers, underscores and hyphens")
+        self._username = value
 
 #-----------------------------------password.getter-----------------------------------
 

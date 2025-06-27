@@ -46,12 +46,13 @@ function updateAuthButtons() {
 
     async function submitRegister() {
         const email = document.getElementById('registerEmail').value;
+        const username = document.getElementById('registerUsername').value; // Nouveau champ
         const password = document.getElementById('registerPassword').value;
     
         const response = await fetch('http://localhost:5000/api/v1/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, username, password }) // Inclure username
         });
     
         const data = await response.json();
@@ -453,7 +454,7 @@ function updateAuthButtons() {
                         leaderboardHTML += `
                             <div class="leaderboard-entry">
                                 <span class="medal">${medal}</span>
-                                <span class="player-name">${entry.user_email}</span>
+                                <span class="player-name">${entry.username}</span>
                                 <span class="player-time">${formatTime(entry.completion_time)}</span>
                             </div>`;
                     });

@@ -28,6 +28,11 @@ class JumpAndLearnFacade:
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
 
+#-----------------------------------get_user_by_username-----------------------------------
+
+    def get_user_by_username(self, username):
+        return self.user_repo.get_by_attribute('username', username)
+
 #-----------------------------------get_all_users-----------------------------------
 
     def get_all_users(self):

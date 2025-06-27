@@ -12,10 +12,10 @@ with app.app_context():
         correct=0
     )
     q2 = Question(
-        text="Combien font 2 + 2 ?",
-        choice1="3",
-        choice2="4",
-        choice3="5",
+        text="Combien vaudra la variable d à la fin de ce programme ? a=3 b=a-5 c=b-3 d=c-4",
+        choice1="0",
+        choice2="-9",
+        choice3="-3",
         correct=1
     )
     q3 = Question(
