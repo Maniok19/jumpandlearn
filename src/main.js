@@ -408,25 +408,29 @@ class BootScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   scale: {
-	parent: 'game-container',
-	mode: Phaser.Scale.FIT,
-	autoCenter: Phaser.Scale.CENTER_BOTH,
-	width: 600,
-	height: 320,
+    parent: 'game-container',
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 600,
+    height: 320,
   },
   pixelArt: true,
   backgroundColor: '#5DACD8',
   physics: {
-	default: 'arcade',
-	arcade: {
-	  gravity: { y: 800 },
-	  debug: true
-	}
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 800 },
+      debug: true
+    }
+  },
+  fps: {
+    target: 60,      // Mets ici la valeur souhaitée (ex: 30 ou 60)
+    forceSetTimeOut: true // Plus fiable pour forcer le cap sur certains navigateurs
   },
   scene: [
-	BootScene,    // Cette scène démarre automatiquement en premier
-	Level1Scene,
-	Level2Scene,
+    BootScene,
+    Level1Scene,
+    Level2Scene,
   ]
 };
 
