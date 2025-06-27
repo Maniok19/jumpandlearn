@@ -184,6 +184,7 @@ export default class Level1Scene extends Phaser.Scene {
         
         // Create layers
         const background = this.map.createLayer('ciel', tilesetWorld);
+        const fakeground = this.map.createLayer('fakepike', tilesetStaticObjects);
         const collision = this.map.createLayer('colision', [tilesetWorld, tilesetspring, tilesetStaticObjects]);
         collision.setCollisionByProperty({ collision: true });
         
@@ -215,7 +216,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupPlayer() {
-        this.player = this.physics.add.sprite(1 * 16 + 8, 30 * 16 + 8, 'player');
+        this.player = this.physics.add.sprite(266 * 16 + 8, 6 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
         
         // Hitbox de base
@@ -280,8 +281,12 @@ export default class Level1Scene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.questionZones, (player, zone) => {
             if (!this.answeredQuestions.has(zone.questionId)) {
                 this.showQuestionUI(zone.questionId, () => {
-                    const collisionLayer = this.map.getLayer('colision').tilemapLayer;
-                    this.startBridgeCreation(zone.bridgeConfig, collisionLayer);
+                    // Passer un tableau de layers au lieu d'un seul
+                    const collisionLayers = [
+                        this.map.getLayer('colision').tilemapLayer,
+                        this.map.getLayer('fakepike').tilemapLayer  // Ajouter le deuxième layer
+                    ];
+                    this.startBridgeCreation(zone.bridgeConfig, collisionLayers);
                     this.answeredQuestions.add(zone.questionId);
                     zone.destroy();
                 });
@@ -596,11 +601,11 @@ export default class Level1Scene extends Phaser.Scene {
                 width: 16, height: 16, pushSpeed: 30,
                 spriteConfig: { tileset: 'tileset_world', frameId: 55 }
             },
-            {
+            /*{
                 x: 218 * 16 + 8, y: 21 * 16 + 8,
                 width: 16, height: 16, pushSpeed: 30,
                 spriteConfig: { tileset: 'tileset_world', frameId: 55 }
-            },
+            },*/
             {
                 x: 220 * 16 + 8, y: 21 * 16 + 8,
                 width: 16, height: 16, pushSpeed: 30,
@@ -1108,6 +1113,53 @@ export default class Level1Scene extends Phaser.Scene {
         }
     }
 
+    playGameOverSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.5);
+
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (e) {
+            // Ignore audio errors
+        }
+    }
+
+    playVictorySound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(660, audioContext.currentTime + 0.15);
+            oscillator.frequency.linearRampToValueAtTime(880, audioContext.currentTime + 0.3);
+
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.35);
+        } catch (e) {
+            // Ignore audio errors
+        }
+    }
+
     // ===========================================
     // UTILITY METHODS
     // ===========================================
@@ -1178,6 +1230,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.isDead = true;
         this.stopTimer();
         this.stopMusic();
+        this.playGameOverSound(); // <-- Ajout ici
         this.physics.world.pause();
         this.input.keyboard.enabled = false;
 
@@ -1213,6 +1266,7 @@ export default class Level1Scene extends Phaser.Scene {
     showVictoryUI() {
         this.stopTimer();
         this.stopMusic();
+        this.playVictorySound(); // <-- Ajout ici
         const finalTime = this.getFinalTime();
         const finalTimeMs = this.elapsedTime;
         
@@ -1244,19 +1298,19 @@ export default class Level1Scene extends Phaser.Scene {
     // BRIDGE CREATION SYSTEM
     // ===========================================
 
-    startBridgeCreation(bridge, collisionLayer) {
+    startBridgeCreation(bridge, collisionLayers) {
         const bridgeCenterX = ((bridge.startX + bridge.endX) / 2) * 16;
         const bridgeCenterY = bridge.y * 16;
         
         this.cameras.main.stopFollow();
         this.cameras.main.pan(bridgeCenterX, bridgeCenterY, 1500, 'Power2', false, (camera, progress) => {
             if (progress === 1) {
-                this.createBridgeWithCamera(bridge, collisionLayer);
+                this.createBridgeWithCamera(bridge, collisionLayers);
             }
         });
     }
 
-    createBridgeWithCamera(bridge, collisionLayer) {
+    createBridgeWithCamera(bridge, collisionLayers) {
         let tilesCreated = 0;
         const totalTiles = bridge.endX - bridge.startX + 1;
         
@@ -1266,16 +1320,23 @@ export default class Level1Scene extends Phaser.Scene {
                 callback: () => {
                     const globalTileId = this.getTileGlobalId(bridge.tileset, bridge.tileId);
                     if (globalTileId !== null) {
-                        const tile = collisionLayer.putTileAt(globalTileId, x, bridge.y);
-                        if (tile) {
-                            // Utiliser la propriété hasCollision pour déterminer les collisions
-                            tile.setCollision(bridge.hasCollision !== false);
-                            
-                            this.addBridgeTileEffect(tile);
-                            
-                            const tilePixelX = x * 16;
-                            this.cameras.main.pan(tilePixelX, bridge.y * 16, 100, 'Power1');
-                        }
+                        // Appliquer le changement sur tous les layers
+                        collisionLayers.forEach(layer => {
+                            const tile = layer.putTileAt(globalTileId, x, bridge.y);
+                            if (tile) {
+                                // Utiliser la propriété hasCollision pour déterminer les collisions
+                                tile.setCollision(bridge.hasCollision !== false);
+                            }
+                        });
+                        
+                        // Effet visuel seulement une fois
+                        this.addBridgeTileEffect({ 
+                            getCenterX: () => x * 16 + 8, 
+                            getCenterY: () => bridge.y * 16 + 8 
+                        });
+                        
+                        const tilePixelX = x * 16;
+                        this.cameras.main.pan(tilePixelX, bridge.y * 16, 100, 'Power1');
                     }
                     
                     tilesCreated++;

@@ -6,10 +6,10 @@ export default class Bomb {
         this.config = {
             speed: 40,
             patrolDistance: 8 * 16, // 8 tiles
-            hitboxWidth: 14,
-            hitboxHeight: 14,
-            hitboxOffsetX: 5,
-            hitboxOffsetY: 9, // Changé de 9 à 2
+            hitboxWidth: 10,
+            hitboxHeight: 10,
+            hitboxOffsetX: 7,
+            hitboxOffsetY: 12, // Changé de 9 à 2
             ...config
         };
         
