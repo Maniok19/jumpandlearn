@@ -216,7 +216,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     setupPlayer() {
-        this.player = this.physics.add.sprite(266 * 16 + 8, 6 * 16 + 8, 'player');
+        this.player = this.physics.add.sprite(2 * 16 + 8, 29 * 16 + 8, 'player');
         this.player.setCollideWorldBounds(true);
         
         // Hitbox de base
